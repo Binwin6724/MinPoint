@@ -19,6 +19,11 @@ jobs:
       - run: npm ci
       - name: Build (release, no installer)
         run: npx tauri build --no-bundle
+      - name: WebView2 runtime version on this machine
+        shell: pwsh
+        run: |
+          $k = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}'
+          (Get-ItemProperty $k -ErrorAction SilentlyContinue).pv | Tee-Object webview2-version.txt
       - name: Run app and collect WebView2 diagnostics
         shell: pwsh
         run: |
@@ -33,9 +38,37 @@ jobs:
           $bmp.Save("diag\desktop.png")
           "running: $(-not $p.HasExited)  exitcode: $($p.ExitCode)" | Tee-Object diag\process.txt
           Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
-          Copy-Item app-stdout.txt, app-stderr.txt diag\ -ErrorAction SilentlyContinue
+          Copy-Item app-stdout.txt, app-stderr.txt, webview2-version.txt diag\ -ErrorAction SilentlyContinue
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: windows-diagnostics
           path: diag/
+
+  # Install the exact published v0.1.0 installer and screenshot it.
+  released-installer:
+    runs-on: windows-latest
+    steps:
+      - name: Install MinPoint 0.1.0 from the GitHub release
+        shell: pwsh
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          gh release download v0.1.0 --repo $env:GITHUB_REPOSITORY --pattern "*win-x64-setup.exe" --dir .
+          $exe = Get-ChildItem *-setup.exe | Select-Object -First 1
+          Start-Process $exe.FullName -ArgumentList "/S" -Wait
+          $app = Get-ChildItem "$env:LOCALAPPDATA\MinPoint", "$env:ProgramFiles\MinPoint" -Filter minpoint.exe -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+          "installed at: $($app.FullName)" | Tee-Object installed.txt
+          Start-Process $app.FullName
+          Start-Sleep -Seconds 20
+          New-Item -ItemType Directory diag-release | Out-Null
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+          $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+          [System.Drawing.Graphics]::FromImage($bmp).CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
+          $bmp.Save("diag-release\desktop.png")
+          Copy-Item installed.txt diag-release\
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-release-installer
+          path: diag-release/

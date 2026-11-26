@@ -6,7 +6,17 @@
     <title>MinPoint</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Static fallback: React replaces this as soon as the UI starts. If it stays visible,
+           the interface's JavaScript could not run (usually an outdated WebView2 runtime on Windows). -->
+      <div style="font-family: -apple-system, 'Segoe UI', system-ui, sans-serif; color: #5b6377; display: grid; place-items: center; height: 100%; text-align: center; padding: 24px; box-sizing: border-box">
+        <div style="max-width: 460px">
+          <div style="font-size: 16px; font-weight: 600; color: #141824; margin-bottom: 8px">Starting MinPoint…</div>
+          <div style="font-size: 12.5px; line-height: 1.5">If this message doesn't go away, MinPoint's interface couldn't start. On Windows, update the
+            <b>Microsoft Edge WebView2 Runtime</b> (Settings ▸ Apps, or download it from Microsoft) and open MinPoint again.</div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
