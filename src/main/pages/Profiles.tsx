@@ -27,7 +27,7 @@ export function Profiles() {
     <>
       <PageHeader
         title="Application Profiles"
-        subtitle="Change which actions appear depending on the app you're using. InputFlow switches automatically using only the name of the frontmost app — it never reads window contents."
+        subtitle="Change which actions appear depending on the app you're using. MinPoint switches automatically using only the name of the frontmost app — it never reads window contents."
         actions={<Button variant="primary" onClick={() => add(null)}><Icon name="plus" size={13} /> New profile</Button>}
       />
       {status?.activeApp && <p className="-mt-2 mb-4 text-[12.5px] text-muted">Active app: {status.activeApp} · Profile: {status.activeProfile ?? "Default"}</p>}
@@ -47,7 +47,7 @@ export function Profiles() {
                 <Icon name={open === p.id ? "chevron-down" : "chevron-right"} size={14} className="text-faint" />
                 <span className="flex-1 text-[13px] font-medium">{p.name}</span>
                 <span className="text-[12px] text-muted">{p.apps.length} app{p.apps.length === 1 ? "" : "s"}</span>
-                {p.disableOverlays && <Badge tone="warn">InputFlow off</Badge>}
+                {p.disableOverlays && <Badge tone="warn">MinPoint off</Badge>}
               </button>
               {open === p.id && (
                 <div className="space-y-1 bg-raised px-4 pb-4">
@@ -60,8 +60,8 @@ export function Profiles() {
                     <AppListEditor value={p.apps} onChange={(v) => patch(p.id, (x) => void (x.apps = v))} placeholder="com.tinyspeck.slackmacgap" />
                   </div>
                   <div className="rounded-[8px] border border-line bg-panel">
-                    <Row title="Turn InputFlow off in these apps" description="No context menu or overlays (e.g. games, remote desktops).">
-                      <Toggle label="Disable InputFlow" checked={p.disableOverlays} onChange={(v) => patch(p.id, (x) => void (x.disableOverlays = v))} />
+                    <Row title="Turn MinPoint off in these apps" description="No context menu or overlays (e.g. games, remote desktops).">
+                      <Toggle label="Disable MinPoint" checked={p.disableOverlays} onChange={(v) => patch(p.id, (x) => void (x.disableOverlays = v))} />
                     </Row>
                   </div>
                   {!p.disableOverlays && (
@@ -88,7 +88,7 @@ export function Profiles() {
         )}
       </Section>
 
-      <Section title="Exclude apps completely" description="InputFlow ignores these apps entirely, regardless of profile.">
+      <Section title="Exclude apps completely" description="MinPoint ignores these apps entirely, regardless of profile.">
         <AppListEditor value={settings.general.excludedApps} onChange={(v) => update((s) => void (s.general.excludedApps = v))} placeholder="com.example.game" />
       </Section>
     </>

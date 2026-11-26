@@ -55,7 +55,7 @@ const NAV: { title?: string; items: NavItem[] }[] = [
     ],
   },
   {
-    title: "InputFlow",
+    title: "MinPoint",
     items: [
       { id: "account", label: "Connected Account", icon: "circle-user" },
       { id: "appearance", label: "Appearance", icon: "palette" },
@@ -90,63 +90,69 @@ function Page({ id }: { id: string }) {
 }
 
 export function MainApp() {
-  const { settings, status, page, setPage, toasts, update } = useStore();
+  const { settings, status, page, setPage, toasts, update, boot } = useStore();
   useTheme(settings.appearance);
   if (!settings.general.onboardingComplete) return <Onboarding />;
   const paused = status?.paused ?? settings.general.paused;
   return (
-    <div className="flex h-full">
-      <aside className="flex w-[230px] shrink-0 flex-col border-r border-line bg-sidebar">
-        <div className="drag-region h-[38px] shrink-0" />
-        <div className="flex items-center gap-2 px-4 pb-3">
-          <img src="/app-icon.png" alt="" className="h-7 w-7" />
+    <div className="app-glow relative flex h-full">
+      <aside className="relative z-[1] flex w-[228px] shrink-0 flex-col border-r border-line bg-sidebar">
+        <div className="drag-region h-[46px] shrink-0" />
+        <div className="flex items-center gap-2.5 px-5 pb-5">
+          <div className="brand-mark"><Icon name="mouse-pointer-click" size={18} strokeWidth={2.2} /></div>
           <div className="leading-tight">
-            <div className="text-[14px] font-semibold">InputFlow</div>
-            <div className="text-[11px] text-muted">Your Computer. Your Controls.</div>
+            <div className="text-[15px] font-bold tracking-[-0.01em]">MinPoint</div>
+            <div className="whitespace-nowrap text-[11px] text-faint">Your controls, everywhere</div>
           </div>
         </div>
         <nav className="flex-1 overflow-y-auto px-2 pb-3" aria-label="Sections">
           {NAV.map((g, gi) => (
             <div key={gi} className="mb-2">
-              {g.title && <div className="px-2 pb-1 pt-2 text-[11px] font-semibold text-faint">{g.title}</div>}
+              {g.title && <div className="px-2.5 pb-1 pt-3 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-faint">{g.title}</div>}
               {g.items.map((it) => (
                 <button
                   key={it.id}
                   onClick={() => setPage(it.id)}
                   aria-current={page === it.id ? "page" : undefined}
-                  className={`flex w-full items-center gap-2.5 rounded-[7px] px-2 py-[5px] text-left text-[13px] ${page === it.id ? "bg-accent text-accent-fg" : "text-fg hover:bg-hover"}`}
+                  className={`flex w-full items-center gap-2.5 rounded-[9px] px-2.5 py-[6px] text-left text-[13px] font-medium transition-colors ${page === it.id ? "bg-hover text-fg" : "text-muted hover:bg-raised hover:text-fg"}`}
                 >
-                  <Icon name={it.icon} size={15} className={page === it.id ? "" : "text-muted"} />
+                  <Icon name={it.icon} size={15} className={page === it.id ? "text-accent" : ""} />
                   <span className="flex-1 truncate">{it.label}</span>
-                  {it.planned && <span className={`text-[10px] ${page === it.id ? "text-accent-fg/80" : "text-faint"}`}>Planned</span>}
+                  {it.planned && <span className="rounded-full bg-hover px-1.5 text-[10px] text-faint">Soon</span>}
                 </button>
               ))}
             </div>
           ))}
         </nav>
-        <div className="border-t border-line p-3">
+        <div className="space-y-1.5 px-4 pb-4 pt-2">
           <button
             onClick={() => update((s) => void (s.general.paused = !s.general.paused))}
-            className="flex w-full items-center gap-2 rounded-[7px] px-2 py-1.5 text-[12.5px] hover:bg-hover"
+            className="flex w-full items-center gap-2 text-[11.5px] text-muted hover:text-fg"
           >
-            <span className={`h-2 w-2 rounded-full ${paused ? "bg-warn" : status?.helperRunning ? "bg-ok" : "bg-bad"}`} />
+            <span className={`h-2 w-2 rounded-full ${paused ? "dot-warn" : status?.helperRunning ? "dot-ok" : "dot-bad"}`} />
             <span className="flex-1 text-left">{paused ? "Paused" : status?.helperRunning ? "Running" : status ? "Native service unavailable" : "Starting…"}</span>
-            <span className="text-[11px] text-accent">{paused ? "Resume" : "Pause"}</span>
+            <span className="text-faint">{paused ? "Resume" : "Pause"}</span>
           </button>
+          <button onClick={() => setPage("account")} className="flex w-full items-center gap-2 text-[11.5px] text-muted hover:text-fg">
+            <span className={`h-2 w-2 rounded-full ${status?.ai.state === "connected" ? "dot-ok" : "bg-faint"}`} />
+            <span className="flex-1 text-left">ChatGPT</span>
+            <span className="text-faint">{status?.ai.state === "connected" ? "connected" : "optional"}</span>
+          </button>
+          <div className="pt-1 text-[11px] text-faint">v{boot.version}</div>
         </div>
       </aside>
-      <main className="flex min-w-0 flex-1 flex-col">
-        <div className="drag-region h-[38px] shrink-0" />
-        <div className="flex-1 overflow-y-auto px-8 pb-10">
-          <div className="mx-auto max-w-[860px]">
+      <main className="relative z-[1] flex min-w-0 flex-1 flex-col">
+        <div className="drag-region h-[46px] shrink-0" />
+        <div className="flex-1 overflow-y-auto px-9 pb-10">
+          <div className="mx-auto max-w-[900px]">
             <Page id={page} />
           </div>
         </div>
       </main>
       <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col gap-2" aria-live="polite">
         {toasts.map((t) => (
-          <div key={t.id} className="anim-pop pointer-events-auto flex max-w-[380px] items-start gap-2 rounded-[9px] border border-line bg-panel px-3 py-2 text-[12.5px] shadow-lg">
-            <Icon name={t.kind === "error" ? "circle-alert" : t.kind === "success" ? "circle-check" : "info"} size={15} className={t.kind === "error" ? "text-bad" : t.kind === "success" ? "text-ok" : "text-accent"} />
+          <div key={t.id} className="anim-pop pointer-events-auto flex max-w-[400px] items-start gap-2.5 rounded-[11px] border border-[var(--if-line-strong)] bg-[var(--if-panel-solid)] px-3.5 py-2.5 text-[12.5px] shadow-[var(--if-shadow)]">
+            <Icon name={t.kind === "error" ? "triangle-exclamation-point" : t.kind === "success" ? "circle-check" : "info"} size={15} className={t.kind === "error" ? "text-bad" : t.kind === "success" ? "text-ok" : "text-accent"} />
             <span>{t.message}</span>
           </div>
         ))}

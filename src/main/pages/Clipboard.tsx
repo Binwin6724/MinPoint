@@ -113,7 +113,7 @@ export function Clipboard() {
                     <button className="rounded p-1 text-faint hover:text-fg" aria-label="Copy" onClick={() => act(api.clipboardCopy(it.id), "Copied")}><Icon name="copy" size={13} /></button>
                     <button className={`rounded p-1 ${it.pinned ? "text-accent" : "text-faint hover:text-fg"}`} aria-label={it.pinned ? "Unpin" : "Pin"} onClick={() => act(api.clipboardFlag(it.id, "pinned", !it.pinned))}><Icon name="pin" size={13} /></button>
                     <button className={`rounded p-1 ${it.favorite ? "text-warn" : "text-faint hover:text-fg"}`} aria-label="Favorite" onClick={() => act(api.clipboardFlag(it.id, "favorite", !it.favorite))}><Icon name="star" size={13} className={it.favorite ? "fill-current" : ""} /></button>
-                    <button className="rounded p-1 text-faint hover:text-bad" aria-label="Delete" onClick={() => act(api.clipboardDelete(it.id))}><Icon name="trash-2" size={13} /></button>
+                    <button className="rounded p-1 text-faint hover:text-bad" aria-label="Delete" onClick={() => act(api.clipboardDelete(it.id))}><Icon name="trash" size={13} /></button>
                   </div>
                 </div>
               ))}

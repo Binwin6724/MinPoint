@@ -2,7 +2,21 @@
 
 ## 0.1.0 — 2026-11-25 (pre-release)
 
-First development build.
+First development build, released as **MinPoint**. It was called InputFlow during early development.
+
+### Installers
+
+| File | For |
+|---|---|
+| `MinPoint-0.1.0-mac-arm64.dmg` | Macs with Apple silicon (ad-hoc signed) |
+| `MinPoint-0.1.0-mac-x64.dmg` | Intel Macs (ad-hoc signed) |
+| `MinPoint-0.1.0-win-x64-setup.exe` | Windows 10/11 x64 |
+
+`SHA256SUMS.txt` is published alongside them.
+
+### Design
+
+Uses the Min-family design: dark glassy cards and an orange→pink gradient accent.
 
 ### macOS
 

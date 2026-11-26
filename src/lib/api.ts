@@ -1,4 +1,4 @@
-// Typed wrappers around InputFlow's Rust commands. The webview can only call
+// Typed wrappers around MinPoint's Rust commands. The webview can only call
 // these narrow commands — there is no generic native bridge.
 import { invoke } from "@tauri-apps/api/core";
 

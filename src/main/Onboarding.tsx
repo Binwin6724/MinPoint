@@ -21,7 +21,7 @@ export function Onboarding() {
           {step === "welcome" && (
             <div className="text-center">
               <img src="/app-icon.png" alt="" className="mx-auto mb-5 h-20 w-20" />
-              <h1 className="text-[26px] font-semibold tracking-tight">Welcome to InputFlow</h1>
+              <h1 className="text-[26px] font-semibold tracking-tight">Welcome to MinPoint</h1>
               <p className="mt-1 text-[15px] text-muted">Your Computer. Your Controls.</p>
               <p className="mx-auto mt-5 max-w-[440px] text-[13.5px] leading-relaxed text-muted">
                 One lightweight app for writing help, clipboard history, text expansion, screen text capture, window snapping and a quick launcher — free, private and offline-first. ChatGPT is optional.
@@ -31,10 +31,10 @@ export function Onboarding() {
           {step === "menu" && (
             <div>
               <h2 className="text-[20px] font-semibold">Shift + Right Click, anywhere</h2>
-              <p className="mt-2 text-[13.5px] text-muted">Hold Shift and right-click to open InputFlow's menu. It adapts to what you're doing:</p>
+              <p className="mt-2 text-[13.5px] text-muted">Hold Shift and right-click to open MinPoint's menu. It adapts to what you're doing:</p>
               <div className="mt-5 space-y-2">
                 {[
-                  ["text-select", "Text selected", "Polish, fix grammar, translate, change case, read aloud…"],
+                  ["text-cursor", "Text selected", "Polish, fix grammar, translate, change case, read aloud…"],
                   ["text-cursor", "Typing in a field", "Insert snippets, paste from history, write with ChatGPT…"],
                   ["mouse-pointer-2", "Anywhere else", "Launcher, screen text capture, screenshots, window snapping…"],
                 ].map(([icon, t, d]) => (
@@ -95,7 +95,7 @@ export function Onboarding() {
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-ok/10 text-ok"><Icon name="check" size={26} /></div>
               <h2 className="text-[20px] font-semibold">You're set</h2>
               <p className="mx-auto mt-2 max-w-[420px] text-[13.5px] text-muted">
-                InputFlow lives in your menu bar. Try selecting some text and pressing Shift + Right Click, or press {prettyAccelerator(settings.shortcuts["launcher.open"] ?? "")} for the launcher.
+                MinPoint lives in your menu bar. Try selecting some text and pressing Shift + Right Click, or press {prettyAccelerator(settings.shortcuts["launcher.open"] ?? "")} for the launcher.
               </p>
             </div>
           )}
@@ -107,7 +107,7 @@ export function Onboarding() {
             <div className="flex gap-2">
               {i > 0 && step !== "done" && <Button variant="ghost" onClick={() => setI(i - 1)}>Back</Button>}
               {step === "done" ? (
-                <Button variant="primary" onClick={() => update((s) => void (s.general.onboardingComplete = true))}>Open InputFlow</Button>
+                <Button variant="primary" onClick={() => update((s) => void (s.general.onboardingComplete = true))}>Open MinPoint</Button>
               ) : (
                 <Button variant="primary" onClick={next}>{step === "welcome" ? "Get started" : step === "permissions" || step === "ai" ? "Continue" : "Next"}</Button>
               )}

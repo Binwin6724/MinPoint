@@ -1,4 +1,4 @@
-// The overlay window hosts InputFlow's floating surfaces: context menu, result
+// The overlay window hosts MinPoint's floating surfaces: context menu, result
 // preview, Write with ChatGPT, command palette, clipboard picker, snippet picker
 // and OCR result. It's shown by the Rust runtime with a mode + payload.
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
@@ -11,7 +11,7 @@ type Show = { mode: string; payload: any; seq?: number };
 
 function Shell({ children, title, onClose, icon }: { children: ReactNode; title?: ReactNode; onClose: () => void; icon?: string }) {
   return (
-    <div className="flex h-screen flex-col overflow-hidden border border-line bg-panel text-fg">
+    <div className="flex h-screen flex-col overflow-hidden border border-line bg-[var(--if-panel-solid)] text-fg">
       {title && (
         <div className="drag-region flex h-9 shrink-0 items-center gap-2 border-b border-line px-3">
           {icon && <Icon name={icon} size={14} className="text-accent" />}
@@ -71,14 +71,14 @@ function MenuView({ payload, settings, close }: { payload: any; settings: Settin
 
   const inv = payload.invocation;
   return (
-    <div className="anim-pop flex h-screen flex-col overflow-hidden border border-line bg-panel text-fg" role="menu" aria-label="InputFlow actions">
+    <div className="anim-pop flex h-screen flex-col overflow-hidden border border-line bg-[var(--if-panel-solid)] text-fg" role="menu" aria-label="MinPoint actions">
       <div className="flex h-8 shrink-0 items-center gap-1.5 border-b border-line px-2.5 text-[11.5px] text-muted">
         {stack.length > 1 ? (
           <button className="flex items-center gap-1 hover:text-fg" onClick={() => setStack(stack.slice(0, -1))}><Icon name="chevron-left" size={13} /> {level.name}</button>
         ) : (
           <>
             <Icon name="sparkles" size={12} className="text-accent" />
-            <span className="truncate">{inv.selectionLen > 0 ? `${inv.selectionLen} characters selected` : inv.editable ? "Text field" : "InputFlow"}</span>
+            <span className="truncate">{inv.selectionLen > 0 ? `${inv.selectionLen} characters selected` : inv.editable ? "Text field" : "MinPoint"}</span>
             <span className="ml-auto truncate text-faint">{inv.app?.name}</span>
           </>
         )}
@@ -94,7 +94,7 @@ function MenuView({ payload, settings, close }: { payload: any; settings: Settin
               aria-disabled={e.kind === "item" && !e.available}
               onMouseEnter={() => selectable.includes(i) && setIdx(i)}
               onClick={() => choose(e)}
-              className={`mx-1 flex w-[calc(100%-8px)] items-center gap-2.5 rounded-[6px] px-2 text-left text-[13px] ${compact ? "h-[26px]" : "h-[30px]"} ${idx === i ? "bg-accent text-accent-fg" : ""} ${e.kind === "item" && !e.available ? "opacity-45" : ""}`}
+              className={`mx-1 flex w-[calc(100%-8px)] items-center gap-2.5 rounded-[6px] px-2 text-left text-[13px] ${compact ? "h-[26px]" : "h-[30px]"} ${idx === i ? "row-active" : ""} ${e.kind === "item" && !e.available ? "opacity-45" : ""}`}
             >
               <Icon name={e.kind === "submenu" ? "folder" : e.icon} size={14} className={idx === i ? "" : "text-muted"} />
               <span className="flex-1 truncate">{e.name}</span>
@@ -185,9 +185,9 @@ function PreviewView({ payload, close }: { payload: any; close: () => void }) {
         {showOriginal && <div className="selectable max-h-[90px] overflow-y-auto whitespace-pre-wrap rounded-[7px] bg-raised p-2 text-[12px] text-muted">{payload.original}</div>}
         {error ? (
           <div className="flex flex-1 flex-col items-start gap-2 rounded-[8px] bg-bad/5 p-3 text-[12.5px]">
-            <div className="flex items-center gap-1.5 font-medium text-bad"><Icon name="circle-alert" size={14} /> {error.message}</div>
-            {error.kind === "usage_limit" && <button className="rounded-[6px] bg-accent px-2.5 py-1 text-[12px] text-accent-fg" onClick={() => api.openExternal("manage_usage")}>Manage usage</button>}
-            {["reauth", "not_connected", "plan_not_authorized"].includes(error.kind) && <span className="text-muted">Open InputFlow → Connected Account to reconnect.</span>}
+            <div className="flex items-center gap-1.5 font-medium text-bad"><Icon name="triangle-exclamation-point" size={14} /> {error.message}</div>
+            {error.kind === "usage_limit" && <button className="rounded-[8px] btn-grad px-2.5 py-1 text-[12px]" onClick={() => api.openExternal("manage_usage")}>Manage usage</button>}
+            {["reauth", "not_connected", "plan_not_authorized"].includes(error.kind) && <span className="text-muted">Open MinPoint → Connected Account to reconnect.</span>}
           </div>
         ) : diff ? (
           <div className="selectable min-h-0 flex-1 overflow-y-auto whitespace-pre-wrap rounded-[8px] border border-line p-2.5 text-[13px] leading-relaxed">
@@ -227,7 +227,7 @@ function PreviewView({ payload, close }: { payload: any; close: () => void }) {
         <button className="rounded-[6px] px-2 py-1 text-[12px] hover:bg-hover" onClick={close}>{streaming ? "Stop" : "Cancel"}</button>
         <button className="rounded-[6px] border border-line px-2.5 py-1 text-[12px] font-medium hover:bg-hover disabled:opacity-40" disabled={streaming || !result || !!error} onClick={() => api.overlayCopy(result)}>Copy</button>
         {payload.replaceable && (
-          <button className="rounded-[6px] bg-accent px-2.5 py-1 text-[12px] font-medium text-accent-fg disabled:opacity-40" disabled={streaming || !result || !!error} onClick={replace} title="⌘↩">
+          <button className="rounded-[8px] btn-grad px-3 py-1 text-[12px] font-medium disabled:opacity-40" disabled={streaming || !result || !!error} onClick={replace} title="⌘↩">
             Replace selection
           </button>
         )}
@@ -265,7 +265,7 @@ function WriteView({ payload, close }: { payload: any; close: () => void }) {
       <div className="flex items-center gap-2 border-t border-line px-3 py-2">
         <span className="text-[11.5px] text-muted">Using ChatGPT plan · you'll review before anything is inserted. Nothing is sent for you.</span>
         <div className="flex-1" />
-        <button className="rounded-[6px] bg-accent px-3 py-1 text-[12px] font-medium text-accent-fg disabled:opacity-40" disabled={!prompt.trim()} onClick={go}>Generate ⌘↩</button>
+        <button className="rounded-[8px] btn-grad px-3 py-1 text-[12px] font-medium disabled:opacity-40" disabled={!prompt.trim()} onClick={go}>Generate ⌘↩</button>
       </div>
     </Shell>
   );
@@ -311,12 +311,12 @@ function PaletteView({ close }: { close: () => void }) {
   };
   const nav = useListNav(rows.length, run, close);
   return (
-    <div className="anim-pop flex h-screen flex-col overflow-hidden border border-line bg-panel">
+    <div className="anim-pop flex h-screen flex-col overflow-hidden border border-line bg-[var(--if-panel-solid)]">
       <SearchBox value={q} onChange={setQ} onKeyDown={nav.onKeyDown} placeholder="Search apps, actions, snippets — or calculate" icon="command" />
       <div className="flex-1 overflow-y-auto p-1.5">
         {rows.length === 0 && <div className="p-6 text-center text-[12.5px] text-muted">{q ? "No results" : "Type to search"}</div>}
         {rows.map((r, i) => (
-          <button key={`${r.kind}:${r.id}`} data-row={i} onMouseEnter={() => nav.setIdx(i)} onClick={() => run(i)} className={`flex w-full items-center gap-3 rounded-[8px] px-3 py-2 text-left ${nav.idx === i ? "bg-accent text-accent-fg" : ""}`}>
+          <button key={`${r.kind}:${r.id}`} data-row={i} onMouseEnter={() => nav.setIdx(i)} onClick={() => run(i)} className={`flex w-full items-center gap-3 rounded-[8px] px-3 py-2 text-left ${nav.idx === i ? "row-active" : ""}`}>
             <Icon name={r.icon} size={16} className={nav.idx === i ? "" : "text-muted"} />
             <span className="flex-1 truncate text-[13.5px]">{r.title}</span>
             <span className={`text-[11.5px] ${nav.idx === i ? "opacity-80" : "text-faint"}`}>{r.subtitle}</span>
@@ -336,12 +336,12 @@ function ClipboardView({ payload, close }: { payload: any; close: () => void }) 
   const paste = (i: number) => api.clipboardPaste(items[i].id).catch((e) => setErr(errorText(e)));
   const nav = useListNav(items.length, paste, close);
   return (
-    <div className="anim-pop flex h-screen flex-col overflow-hidden border border-line bg-panel">
+    <div className="anim-pop flex h-screen flex-col overflow-hidden border border-line bg-[var(--if-panel-solid)]">
       <SearchBox value={q} onChange={setQ} onKeyDown={nav.onKeyDown} placeholder="Search clipboard history" icon="clipboard-list" />
       <div className="flex-1 overflow-y-auto p-1.5">
         {items.length === 0 && <div className="p-6 text-center text-[12.5px] text-muted">No clipboard items</div>}
         {items.map((it, i) => (
-          <button key={it.id} data-row={i} onMouseEnter={() => nav.setIdx(i)} onClick={() => paste(i)} className={`flex w-full items-start gap-2.5 rounded-[8px] px-3 py-2 text-left ${nav.idx === i ? "bg-accent text-accent-fg" : ""}`}>
+          <button key={it.id} data-row={i} onMouseEnter={() => nav.setIdx(i)} onClick={() => paste(i)} className={`flex w-full items-start gap-2.5 rounded-[8px] px-3 py-2 text-left ${nav.idx === i ? "row-active" : ""}`}>
             <Icon name={it.pinned ? "pin" : it.kind === "files" ? "file" : "type"} size={14} className={`mt-0.5 ${nav.idx === i ? "" : "text-faint"}`} />
             <span className="line-clamp-2 flex-1 whitespace-pre-wrap break-words text-[12.5px]">{it.text}</span>
           </button>
@@ -359,12 +359,12 @@ function SnippetsView({ payload, close }: { payload: any; close: () => void }) {
   const insert = (i: number) => api.snippetInsert(list[i].id).catch((e) => setErr(errorText(e)));
   const nav = useListNav(list.length, insert, close);
   return (
-    <div className="anim-pop flex h-screen flex-col overflow-hidden border border-line bg-panel">
+    <div className="anim-pop flex h-screen flex-col overflow-hidden border border-line bg-[var(--if-panel-solid)]">
       <SearchBox value={q} onChange={setQ} onKeyDown={nav.onKeyDown} placeholder="Insert a snippet" icon="text-cursor-input" />
       <div className="flex-1 overflow-y-auto p-1.5">
-        {list.length === 0 && <div className="p-6 text-center text-[12.5px] text-muted">{payload.snippets.length ? "No matches" : "No snippets yet — create them in InputFlow → Text Expander."}</div>}
+        {list.length === 0 && <div className="p-6 text-center text-[12.5px] text-muted">{payload.snippets.length ? "No matches" : "No snippets yet — create them in MinPoint → Text Expander."}</div>}
         {list.map((s, i) => (
-          <button key={s.id} data-row={i} onMouseEnter={() => nav.setIdx(i)} onClick={() => insert(i)} className={`flex w-full flex-col rounded-[8px] px-3 py-2 text-left ${nav.idx === i ? "bg-accent text-accent-fg" : ""}`}>
+          <button key={s.id} data-row={i} onMouseEnter={() => nav.setIdx(i)} onClick={() => insert(i)} className={`flex w-full flex-col rounded-[8px] px-3 py-2 text-left ${nav.idx === i ? "row-active" : ""}`}>
             <span className="flex items-center gap-2 text-[13px] font-medium">{s.name}{s.trigger && <code className="mono text-[11px] opacity-70">{s.trigger}</code>}</span>
             <span className={`line-clamp-1 text-[12px] ${nav.idx === i ? "opacity-80" : "text-muted"}`}>{s.content}</span>
           </button>
@@ -395,7 +395,7 @@ function OcrView({ payload, close }: { payload: any; close: () => void }) {
         <button className="rounded-[6px] px-2 py-1 text-[12px] hover:bg-hover disabled:opacity-40" disabled={empty} onClick={() => api.speak(text).catch((e) => setMsg(errorText(e)))}>Read aloud</button>
         {payload.aiReady && <button className="rounded-[6px] px-2 py-1 text-[12px] hover:bg-hover disabled:opacity-40" disabled={empty} onClick={() => api.overlayRunOnText("ai.translate", text).catch((e) => setMsg(errorText(e)))}>Translate</button>}
         {payload.aiReady && <button className="rounded-[6px] px-2 py-1 text-[12px] hover:bg-hover disabled:opacity-40" disabled={empty} onClick={() => api.overlayRunOnText("ai.polish", text).catch((e) => setMsg(errorText(e)))}>Polish</button>}
-        <button className="rounded-[6px] bg-accent px-2.5 py-1 text-[12px] font-medium text-accent-fg disabled:opacity-40" disabled={empty} onClick={() => api.overlayCopy(text)}>Copy</button>
+        <button className="rounded-[8px] btn-grad px-3 py-1 text-[12px] font-medium disabled:opacity-40" disabled={empty} onClick={() => api.overlayCopy(text)}>Copy</button>
       </div>
     </Shell>
   );
@@ -416,7 +416,7 @@ export function OverlayApp() {
 
   useEffect(() => {
     // The overlay window is opaque (no private transparency APIs), so match the panel colour.
-    document.body.style.background = "var(--if-panel)";
+    document.body.style.background = "var(--if-panel-solid)";
     const a = listen<Show>("overlay:show", (e) => {
       setShow({ ...e.payload, seq: Date.now() });
       api.bootstrap().then((b) => setSettings(b.settings));

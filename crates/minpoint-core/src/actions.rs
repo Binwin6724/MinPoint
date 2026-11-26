@@ -1,4 +1,4 @@
-//! Central action registry. Every InputFlow feature that can be triggered from the
+//! Central action registry. Every MinPoint feature that can be triggered from the
 //! context menu, a shortcut, a mouse button, a gesture, the launcher, a macro or the
 //! tray is described here once.
 
@@ -54,7 +54,7 @@ pub enum OutputBehavior {
     Preview,
     /// Put the result on the clipboard.
     Copy,
-    /// Open an InputFlow surface (palette, clipboard picker, OCR result…).
+    /// Open an MinPoint surface (palette, clipboard picker, OCR result…).
     OpenSurface,
     /// Side effect only (speak, snap window…).
     None,
@@ -116,7 +116,7 @@ pub enum Builtin {
     WindowBottomRight,
     WindowNextDisplay,
     StartVoiceTyping,
-    PauseInputFlow,
+    PauseMinPoint,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -252,7 +252,7 @@ pub fn builtin_actions() -> Vec<ActionDef> {
         writing("ai.simplify", "Simplify", "feather", W::Simplify, ""),
         writing("ai.professional", "Make Professional", "briefcase", W::Professional, "tone"),
         writing("ai.casual", "Make Casual", "coffee", W::Casual, "tone"),
-        writing("ai.friendly", "Make Friendly", "smile", W::Friendly, "tone"),
+        writing("ai.friendly", "Make Friendly", "face-slightly-smiling", W::Friendly, "tone"),
         writing("ai.formal", "Make Formal", "landmark", W::Formal, "tone"),
         writing("ai.summarize", "Summarize", "list", W::Summarize, ""),
         writing("ai.explain", "Explain", "lightbulb", W::Explain, ""),
@@ -281,7 +281,7 @@ pub fn builtin_actions() -> Vec<ActionDef> {
             .d,
         text("case.upper", "UPPERCASE", "case-upper", TextOp::Uppercase, "case"),
         text("case.lower", "lowercase", "case-lower", TextOp::Lowercase, "case"),
-        text("case.title", "Title Case", "heading", TextOp::TitleCase, "case"),
+        text("case.title", "Title Case", "heading-1", TextOp::TitleCase, "case"),
         text("case.sentence", "Sentence case", "case-sensitive", TextOp::SentenceCase, "case"),
         text("case.camel", "camelCase", "code", TextOp::CamelCase, "case"),
         text("case.pascal", "PascalCase", "code", TextOp::PascalCase, "case"),
@@ -290,9 +290,9 @@ pub fn builtin_actions() -> Vec<ActionDef> {
         text("case.constant", "CONSTANT_CASE", "code", TextOp::ConstantCase, "case"),
         text("text.trim", "Remove Extra Whitespace", "eraser", TextOp::TrimWhitespace, "text"),
         text("text.dedupe", "Remove Duplicate Lines", "list-x", TextOp::RemoveDuplicateLines, "text"),
-        text("text.sort", "Sort Lines", "arrow-down-a-z", TextOp::SortLines, "text"),
+        text("text.sort", "Sort Lines", "list-sort-ascending", TextOp::SortLines, "text"),
         text("text.reverse", "Reverse Text", "undo-2", TextOp::ReverseText, "text"),
-        text("text.join", "Remove Line Breaks", "wrap-text", TextOp::RemoveLineBreaks, "text"),
+        text("text.join", "Remove Line Breaks", "text-wrap", TextOp::RemoveLineBreaks, "text"),
         builtin("text.stats", "Count Words & Characters", "hash", Builtin::TextStats)
             .group("text")
             .ctx(&[Selection])
@@ -308,7 +308,7 @@ pub fn builtin_actions() -> Vec<ActionDef> {
         dev("dev.b64_decode", "Base64 Decode", "binary", DevOp::Base64Decode),
         dev("dev.url_encode", "URL Encode", "link", DevOp::UrlEncode),
         dev("dev.url_decode", "URL Decode", "link", DevOp::UrlDecode),
-        dev("dev.sha256", "SHA-256 Hash", "fingerprint", DevOp::Sha256),
+        dev("dev.sha256", "SHA-256 Hash", "fingerprint-pattern", DevOp::Sha256),
         dev("dev.ts_to_date", "Timestamp → Date", "clock", DevOp::TimestampToDate),
         dev("dev.color", "Convert Colour", "palette", DevOp::ColorConvert),
         dev("dev.csv_md", "CSV → Markdown Table", "table", DevOp::CsvToMarkdownTable),
@@ -374,7 +374,7 @@ pub fn builtin_actions() -> Vec<ActionDef> {
             .perms(&sel_perm)
             .sec(SecurityClass::InputSynthesis)
             .d,
-        builtin("insert.uuid", "Insert UUID", "fingerprint", Builtin::UuidInsert)
+        builtin("insert.uuid", "Insert UUID", "fingerprint-pattern", Builtin::UuidInsert)
             .group("dev")
             .ctx(&[Editable])
             .caps(&[C::InsertText])
@@ -410,7 +410,7 @@ pub fn builtin_actions() -> Vec<ActionDef> {
         win("window.bottom_right", "Bottom Right", "arrow-down-right", Builtin::WindowBottomRight),
         win("window.next_display", "Move to Next Display", "monitor", Builtin::WindowNextDisplay),
         builtin("tts.stop", "Stop Speaking", "volume-x", Builtin::StopSpeaking).ctx(&[]).caps(&[C::Tts]).d,
-        builtin("app.pause", "Pause InputFlow", "pause", Builtin::PauseInputFlow).ctx(&[]).d,
+        builtin("app.pause", "Pause MinPoint", "pause", Builtin::PauseMinPoint).ctx(&[]).d,
     ]
 }
 

@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Narrow permissions for InputFlow windows. Native operations go through InputFlow's own typed commands only.",
+  "description": "Narrow permissions for MinPoint windows. Native operations go through MinPoint's own typed commands only.",
   "windows": ["main", "overlay"],
   "permissions": [
     "core:default",

@@ -1,19 +1,19 @@
 [package]
-name = "inputflow"
-description = "InputFlow — Your Computer. Your Controls."
+name = "minpoint"
+description = "MinPoint — Your Computer. Your Controls."
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 
 [lib]
-name = "inputflow_lib"
+name = "minpoint_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-inputflow-core = { path = "../crates/inputflow-core" }
+minpoint-core = { path = "../crates/minpoint-core" }
 tauri = { version = "2", features = ["tray-icon", "image-png"] }
 tauri-plugin-global-shortcut = "2"
 tauri-plugin-single-instance = "2"

@@ -8,10 +8,18 @@ _Last updated: 2026-11-25_
 - Rust 1.100 (Homebrew rustup), Node 22, Swift 6.4 (Command Line Tools only; no Xcode).
 - Accessibility, Input Monitoring and Screen Recording **cannot be granted on this machine without an administrator**. That limits manual verification (see below).
 
+## Rename & family style (2026-11-25)
+
+- Renamed InputFlow to **MinPoint**: bundle `app.minpoint.desktop`, crate `minpoint-core`, helper `minpoint-helper`.
+- Restyled to the Min-family design system (shared with MinTransfer and MinSoundFX), with an orange→pink accent.
+- New family-style app icon (`scripts/make-icons.swift`).
+- README, `docs/` layout, CONTRIBUTING, LICENSE (MIT) and CI follow the sibling repos.
+- Per-architecture installers plus `SHA256SUMS.txt`.
+
 ## Completed
 
 **Phase 1: Foundation**
-- Workspace: `inputflow-core` crate, Tauri 2 app, Swift helper, React UI.
+- Workspace: `minpoint-core` crate, Tauri 2 app, Swift helper, React UI.
 - Action registry, versioned settings with migration, SQLite with migrations.
 - Keychain secrets, permission manager.
 - Menu bar tray (pause/resume, launcher, clipboard, OCR, quit).
@@ -71,7 +79,7 @@ _Last updated: 2026-11-25_
 - `npm test` (vitest): **2 passed**.
 - `tsc -b`: clean.
 - `npm run build`: JS bundle 374 KB (113 KB gzip). The icon set was trimmed from 1,040 KB.
-- `tauri build --debug --bundles app`: built `InputFlow.app` (debug, 64.5 MiB unoptimised). The helper is 400 KB universal.
+- `tauri build --debug --bundles app`: built `MinPoint.app` (debug, 64.5 MiB unoptimised). The helper is 400 KB universal.
 - Smoke-tested the helper protocol directly: ping, permissions, frontmostApp, voices, 33 OCR languages, mouseLocation, error path.
 - Launched the bundled app: the main process and the helper sidecar both started. Killing the app made the helper exit (crash-safety path verified).
 - UI was rendered through the dev harness in headless Chrome: Overview (dark) and onboarding inspected.
@@ -80,11 +88,27 @@ _Last updated: 2026-11-25_
 
 - End-to-end Shift + Right Click, text insertion, OCR capture, window snapping, clipboard watching and snippet expansion in real apps. All of these need TCC permissions that this managed Mac won't grant without admin rights.
 - ChatGPT sign-in and inference. No sign-in was performed, and eligibility depends on the user's plan.
-- Release-build CPU/RAM/startup/battery benchmarks. **No performance numbers are claimed.** The Overview page shows live measured RSS/CPU from `ps`.
+- Battery impact and startup time haven't been benchmarked yet.
+
+## Measured (release build, Apple Silicon, 2026-11-25)
+
+Measured with `ps`, 10 s after launch, with the onboarding window open:
+
+| Process | Memory | CPU |
+|---|---|---|
+| `minpoint` | 97.5 MB RSS | 0.0% |
+| `minpoint-helper` | 31.7 MB RSS | 0.0% |
+
+WebKit renderer processes are separate and were not isolated in this measurement.
+
+Sizes:
+- DMG (arm64): 5.6 MB
+- app binary: 7.8 MB
+- helper: 209 KB (arm64)
 
 ## Known issues / limitations
 
-- In `tauri dev`, macOS attributes permissions to the terminal that launched the app, not to InputFlow. Test permissions with the bundled `.app`.
+- In `tauri dev`, macOS attributes permissions to the terminal that launched the app, not to MinPoint. Test permissions with the bundled `.app`.
 - Apps that don't expose `AXSelectedText` (many Electron/Chromium apps) use the Cmd+C fallback. In those apps a changed selection can't be detected before replacing; the focus/pid check still applies.
 - Overlays are opaque (no private transparency API), so the menu-opacity setting has no effect.
 - Each settings change re-registers shortcuts and the event tap. That's fine for toggles; text fields such as profile names save on every keystroke and should be debounced.

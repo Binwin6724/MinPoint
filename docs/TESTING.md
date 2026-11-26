@@ -22,7 +22,7 @@ npm run build
 
 | Suite | Covers |
 |---|---|
-| `inputflow-core::calc` | Precedence, right-associative powers, implicit multiplication, percent / "X% of Y", factorial, functions, thousands separators, division by zero, unknown identifiers (no code execution), depth/length limits |
+| `minpoint-core::calc` | Precedence, right-associative powers, implicit multiplication, percent / "X% of Y", factorial, functions, thousands separators, division by zero, unknown identifiers (no code execution), depth/length limits |
 | `::units` | Length, mass, data (SI and IEC), time, temperature; mismatched dimensions rejected |
 | `::text` | Title/sentence case, whitespace, dedupe, sort, join, naming conventions (acronyms), find/replace, stats |
 | `::devtools` | JSON format/minify/validate, Base64, URL, SHA-256/MD5 test vectors, timestamps, colours, CSV→Markdown, XML, regex |
@@ -31,10 +31,10 @@ npm run build
 | `::menu` | Selection / field / anywhere menus, favorites, defaults, AI-disconnected hints, capability hiding, secure fields, paused, excluded apps |
 | `::settings` | Privacy-preserving defaults, round-trip, partial files, migration, clamping, profile priority |
 | `::actions` | Unique namespaced ids, AI flag consistency |
-| `inputflow::ai::auth` | RFC 7636 PKCE vector, authorize URL for first vs returning sign-in, terminal refresh errors, **real loopback callback server** (404 for other paths, state validation) |
-| `inputflow::ai` | Mapping of documented plan-usage error codes |
-| `inputflow::db` | Clipboard dedupe/ordering/limits, **ciphertext at rest**, pin survives clear, snippets, usage |
-| `inputflow::shortcuts` | Reserved and duplicate accelerator detection |
+| `minpoint::ai::auth` | RFC 7636 PKCE vector, authorize URL for first vs returning sign-in, terminal refresh errors, **real loopback callback server** (404 for other paths, state validation) |
+| `minpoint::ai` | Mapping of documented plan-usage error codes |
+| `minpoint::db` | Clipboard dedupe/ordering/limits, **ciphertext at rest**, pin survives clear, snippets, usage |
+| `minpoint::shortcuts` | Reserved and duplicate accelerator detection |
 | `src/overlay/diff.test.ts` | Word diff correctness |
 
 Test code lives under `#[cfg(test)]` or `*.test.ts`. The `dev/` UI harness (fake IPC) is not part of the production build.
@@ -67,7 +67,7 @@ Use the bundled app (`npm run app:build` or `npx tauri build --debug --bundles a
 8. OCR: run a capture on an image of text.
 9. Window shortcuts across two displays, including a scaled display.
 10. Emergency pause: the tap is released and normal right-click behaviour is restored.
-11. Kill InputFlow in Activity Monitor: `inputflow-helper` exits and input is normal.
+11. Kill MinPoint in Activity Monitor: `minpoint-helper` exits and input is normal.
 12. Sleep/wake: the tap re-enables (helper handles `tapDisabledByTimeout`).
 
 Record results in PLATFORM_COMPATIBILITY.md.

@@ -4,7 +4,7 @@ import { Badge, Button, PageHeader, Row, Section } from "../../components/ui";
 
 export const PERMS: { key: keyof Permissions; title: string; icon: string; why: string }[] = [
   { key: "accessibility", title: "Accessibility", icon: "accessibility", why: "Read the text you select, insert results into the field you're editing, and move windows. Required for the context menu and writing actions." },
-  { key: "inputMonitoring", title: "Input Monitoring", icon: "mouse-pointer-click", why: "Detect Shift + Right Click and text-expansion abbreviations. InputFlow does not log keystrokes." },
+  { key: "inputMonitoring", title: "Input Monitoring", icon: "mouse-pointer-click", why: "Detect Shift + Right Click and text-expansion abbreviations. MinPoint does not log keystrokes." },
   { key: "screenRecording", title: "Screen Recording", icon: "monitor", why: "Screen Text Capture and screenshots. Used only when you start a capture." },
   { key: "microphone", title: "Microphone", icon: "mic", why: "Voice typing (planned). Not requested until that feature exists." },
 ];
@@ -26,7 +26,7 @@ export function PermissionsPage() {
     <>
       <PageHeader
         title="Permissions"
-        subtitle="InputFlow asks only for what a feature needs, when you turn that feature on. You can revoke any permission in System Settings → Privacy & Security at any time."
+        subtitle="MinPoint asks only for what a feature needs, when you turn that feature on. You can revoke any permission in System Settings → Privacy & Security at any time."
         actions={<Button onClick={() => api.restartInput().then(refresh)}>Re-check</Button>}
       />
       <Section>
@@ -48,7 +48,7 @@ export function PermissionsPage() {
         })}
       </Section>
       <p className="px-1 text-[12px] text-muted">
-        After granting Accessibility or Input Monitoring, macOS may need InputFlow to restart before Shift + Right Click works. If it still shows as inactive, quit InputFlow from the menu bar and open it again.
+        After granting Accessibility or Input Monitoring, macOS may need MinPoint to restart before Shift + Right Click works. If it still shows as inactive, quit MinPoint from the menu bar and open it again.
         Fields protected by macOS Secure Input (password fields) are never read, even with these permissions.
       </p>
     </>

@@ -24,7 +24,7 @@ pub const RESOURCE: &str = "https://api.openai.com/v1";
 pub const DYNAMIC_CLIENT: &str = "dynamic_agent_client";
 pub const SCOPES: &str = "openid profile email offline_access resource.invoke chatgpt.tokens.use.direct";
 pub const PLAN_SCOPE: &str = "chatgpt.tokens.use.direct";
-pub const APP_NAME: &str = "InputFlow";
+pub const APP_NAME: &str = "MinPoint";
 const CALLBACK_PATH: &str = "/auth/callback";
 const PREFERRED_PORT: u16 = 1455;
 
@@ -136,8 +136,8 @@ pub struct Callback {
     pub params: HashMap<String, String>,
 }
 
-const PAGE_OK: &str = "<!doctype html><meta charset=utf-8><title>InputFlow</title><body style=\"font:15px -apple-system,system-ui,sans-serif;display:grid;place-items:center;height:90vh;color:#222\"><div style=\"text-align:center\"><h2 style=\"font-weight:600\">You can return to InputFlow</h2><p>This tab can be closed.</p></div>";
-const PAGE_ERR: &str = "<!doctype html><meta charset=utf-8><title>InputFlow</title><body style=\"font:15px -apple-system,system-ui,sans-serif;display:grid;place-items:center;height:90vh;color:#222\"><div style=\"text-align:center\"><h2 style=\"font-weight:600\">Sign-in was not completed</h2><p>Return to InputFlow for details.</p></div>";
+const PAGE_OK: &str = "<!doctype html><meta charset=utf-8><title>MinPoint</title><body style=\"font:15px -apple-system,system-ui,sans-serif;display:grid;place-items:center;height:90vh;color:#222\"><div style=\"text-align:center\"><h2 style=\"font-weight:600\">You can return to MinPoint</h2><p>This tab can be closed.</p></div>";
+const PAGE_ERR: &str = "<!doctype html><meta charset=utf-8><title>MinPoint</title><body style=\"font:15px -apple-system,system-ui,sans-serif;display:grid;place-items:center;height:90vh;color:#222\"><div style=\"text-align:center\"><h2 style=\"font-weight:600\">Sign-in was not completed</h2><p>Return to MinPoint for details.</p></div>";
 
 /// Wait for the browser to hit the loopback callback. Ignores unrelated requests.
 pub async fn wait_for_callback(listener: TcpListener, expected_state: &str, timeout: Duration) -> Result<Callback, String> {
@@ -293,7 +293,7 @@ mod tests {
         let q: HashMap<_, _> = u.query_pairs().into_owned().collect();
         assert_eq!(u.as_str().split('?').next().unwrap(), AUTHORIZE_URL);
         assert_eq!(q["client_id"], DYNAMIC_CLIENT);
-        assert_eq!(q["agent_name_hint"], "InputFlow");
+        assert_eq!(q["agent_name_hint"], "MinPoint");
         assert!(!q.contains_key("id_token_hint"), "no id_token_hint during first registration");
         assert_eq!(q["scope"], SCOPES);
         assert_eq!(q["code_challenge_method"], "S256");

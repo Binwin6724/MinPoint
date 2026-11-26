@@ -4,11 +4,11 @@ import type { PermState } from "../../lib/api";
 
 function Stat({ label, value, sub, icon, onClick }: { label: string; value: string; sub?: string; icon: string; onClick?: () => void }) {
   return (
-    <button onClick={onClick} className="flex flex-col items-start rounded-[10px] border border-line bg-panel p-3.5 text-left hover:bg-hover disabled:hover:bg-panel" disabled={!onClick}>
+    <button onClick={onClick} className="card flex flex-col items-start p-4 text-left transition hover:border-[var(--if-line-strong)] disabled:hover:border-line" disabled={!onClick}>
       <div className="mb-2 flex items-center gap-1.5 text-[12px] text-muted">
-        <Icon name={icon} size={14} /> {label}
+        <Icon name={icon} size={14} className="text-accent" /> {label}
       </div>
-      <div className="text-[15px] font-semibold">{value}</div>
+      <div className="text-[17px] font-semibold tracking-[-0.01em]">{value}</div>
       {sub && <div className="mt-0.5 text-[11.5px] text-muted">{sub}</div>}
     </button>
   );
@@ -26,21 +26,21 @@ export function Overview() {
 
   return (
     <>
-      <PageHeader title="Overview" subtitle="Everything InputFlow is doing on this computer, at a glance." />
+      <PageHeader title="Overview" subtitle="Everything MinPoint is doing on this computer, at a glance." />
 
       {status && !status.helperRunning && (
-        <div className="mb-5 flex items-center gap-3 rounded-[10px] border border-bad/30 bg-bad/5 p-3 text-[13px]">
-          <Icon name="circle-alert" className="text-bad" />
+        <div className="mb-5 flex items-center gap-3 rounded-[12px] border border-bad/35 bg-bad/10 p-3.5 text-[13px]">
+          <Icon name="triangle-exclamation-point" className="text-bad" />
           <div className="flex-1">
             {status.platform === "unsupported"
               ? "System-wide features aren't available on this operating system in this build. Local tools in the app still work."
-              : "InputFlow's native helper isn't running, so system-wide features are unavailable."}
+              : "MinPoint's native helper isn't running, so system-wide features are unavailable."}
           </div>
         </div>
       )}
       {status?.inputTapError && !status.paused && (
-        <div className="mb-5 flex items-center gap-3 rounded-[10px] border border-warn/30 bg-warn/5 p-3 text-[13px]">
-          <Icon name="triangle-alert" className="text-warn" />
+        <div className="mb-5 flex items-center gap-3 rounded-[12px] border border-warn/35 bg-warn/10 p-3.5 text-[13px]">
+          <Icon name="triangle-exclamation-point" className="text-warn" />
           <div className="flex-1">Shift + Right Click is inactive: {status.inputTapError}</div>
           <Button size="sm" onClick={() => setPage("permissions")}>Fix permissions</Button>
         </div>
@@ -65,7 +65,7 @@ export function Overview() {
         <Stat icon="clipboard-list" label="Clipboard history" value={settings.clipboard.historyEnabled ? `${status?.clipboardItems ?? 0} items` : "Off"} sub={settings.clipboard.historyEnabled ? `Kept ${settings.clipboard.retentionDays} days` : "Opt-in"} onClick={() => setPage("clipboard")} />
         <Stat
           icon="cpu"
-          label="InputFlow resource use"
+          label="MinPoint resource use"
           value={status?.resources ? `${status.resources.appMemoryMb} MB` : "—"}
           sub={status?.resources ? `${status.resources.appCpuPercent.toFixed(1)}% CPU · measured just now` : "Measured live"}
         />
@@ -103,7 +103,7 @@ export function Overview() {
             <div key={s.actionId} className="flex items-center gap-3 border-b border-line px-4 py-2.5 text-[13px] last:border-b-0">
               <span className="flex-1 truncate">{actionName(s.actionId)}</span>
               <kbd className="rounded border border-line bg-raised px-1.5 py-0.5 text-[11.5px]">{prettyAccelerator(s.accelerator)}</kbd>
-              {!s.registered && <span title={s.error ?? ""}><Icon name="triangle-alert" size={14} className="text-warn" /></span>}
+              {!s.registered && <span title={s.error ?? ""}><Icon name="triangle-exclamation-point" size={14} className="text-warn" /></span>}
             </div>
           ))}
           <div className="flex items-center gap-3 px-4 py-2.5 text-[13px]">

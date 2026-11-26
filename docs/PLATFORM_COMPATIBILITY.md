@@ -45,9 +45,10 @@ No application has been verified yet: TCC permissions could not be granted on th
 ## Distribution requirements
 
 - **macOS**:
-  - A Developer ID Application certificate ($99/yr Apple Developer Program) to sign `InputFlow.app` and the `inputflow-helper` sidecar.
+  - A Developer ID Application certificate ($99/yr Apple Developer Program) to sign `MinPoint.app` and the `minpoint-helper` sidecar.
   - Notarization through `notarytool` (Apple ID plus app-specific password, or an API key).
   - Configure `bundle.macOS.signingIdentity` and the `APPLE_*` environment variables for `tauri build`.
   - Without signing, macOS TCC permission grants may reset on every rebuild.
-- **Windows**: an Authenticode code-signing certificate (OV/EV). Set `bundle.windows.certificateThumbprint`. NSIS and MSI targets are configured.
+- **Windows**: an Authenticode code-signing certificate (OV/EV). Set `bundle.windows.certificateThumbprint`. The NSIS `setup.exe` installer (per-user) is built by CI.
+- **Current releases**: macOS DMGs are **ad-hoc signed** (`signingIdentity: "-"`), like the other Min apps, and not notarized. The Windows installer is unsigned. CI (`.github/workflows/ci.yml`) builds `mac-arm64`, `mac-x64` and `win-x64`, verifies the helper is inside the macOS app, and publishes `SHA256SUMS.txt`.
 - **Updates**: the Tauri updater plugin with a signing key pair is **not configured**. Do not enable unsigned updates.

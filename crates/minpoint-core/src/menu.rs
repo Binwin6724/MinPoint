@@ -27,7 +27,7 @@ pub enum MenuEntry {
     Separator,
 }
 
-/// Build the menu. Returns an empty list when InputFlow is paused or the app is excluded.
+/// Build the menu. Returns an empty list when MinPoint is paused or the app is excluded.
 pub fn resolve(actions: &[ActionDef], settings: &Settings, ctx: &MenuContext) -> Vec<MenuEntry> {
     if settings.general.paused || settings.is_app_excluded(&ctx.app_id) {
         return vec![];

@@ -56,7 +56,7 @@ pub struct General {
     pub paused: bool,
     /// Keep running in the menu bar when the window is closed.
     pub keep_running_on_close: bool,
-    /// Bundle IDs / exe names where InputFlow is completely disabled.
+    /// Bundle IDs / exe names where MinPoint is completely disabled.
     pub excluded_apps: Vec<String>,
 }
 
@@ -113,7 +113,7 @@ pub struct Appearance {
 
 impl Default for Appearance {
     fn default() -> Self {
-        Appearance { theme: "system".into(), accent: "#5b6cff".into(), compact: false, font_scale: 1.0, reduce_motion: false, high_contrast: false, menu_opacity: 0.96 }
+        Appearance { theme: "system".into(), accent: "#ff7a45".into(), compact: false, font_scale: 1.0, reduce_motion: false, high_contrast: false, menu_opacity: 0.96 }
     }
 }
 
@@ -227,7 +227,7 @@ impl Default for SpeechSettings {
 pub struct ScreenshotSettings {
     pub copy_to_clipboard: bool,
     pub save_to_disk: bool,
-    /// Empty = ~/Pictures/InputFlow
+    /// Empty = ~/Pictures/MinPoint
     pub save_dir: String,
 }
 
@@ -338,7 +338,7 @@ mod tests {
         assert!(!old.menu.shift_right_click);
         let clamped = Settings::from_json(r##"{"speech":{"rate":9},"appearance":{"accent":"red","theme":"neon"}}"##).unwrap();
         assert_eq!(clamped.speech.rate, 2.0);
-        assert_eq!(clamped.appearance.accent, "#5b6cff");
+        assert_eq!(clamped.appearance.accent, "#ff7a45");
         assert_eq!(clamped.appearance.theme, "system");
         assert!(Settings::from_json("not json").is_err());
     }

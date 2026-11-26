@@ -68,14 +68,14 @@ export function Expander() {
     <>
       <PageHeader
         title="Text Expander"
-        subtitle="Type a short abbreviation like ;prdone and InputFlow replaces it with your saved text. Snippets can also be inserted from the menu or launcher."
+        subtitle="Type a short abbreviation like ;prdone and MinPoint replaces it with your saved text. Snippets can also be inserted from the menu or launcher."
         actions={
           <>
             <label className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-[7px] border border-line bg-panel px-3 text-[13px] font-medium hover:bg-hover">
               <Icon name="upload" size={13} /> Import
               <input type="file" accept="application/json,.json" className="hidden" onChange={(e) => e.target.files?.[0] && importFile(e.target.files[0])} />
             </label>
-            <Button onClick={async () => download("inputflow-snippets.json", await api.snippetsExport())}><Icon name="download" size={13} /> Export</Button>
+            <Button onClick={async () => download("minpoint-snippets.json", await api.snippetsExport())}><Icon name="download" size={13} /> Export</Button>
             <Button variant="primary" onClick={() => setEdit(blank())}><Icon name="plus" size={13} /> New snippet</Button>
           </>
         }
@@ -157,7 +157,7 @@ export function Expander() {
                 <div className="mt-0.5 line-clamp-2 whitespace-pre-wrap text-[12px] text-muted">{s.content}</div>
               </div>
               <Button size="sm" variant="ghost" onClick={() => setEdit(s)}>Edit</Button>
-              <Button size="sm" variant="ghost" aria-label={`Delete ${s.name}`} onClick={() => confirm(`Delete “${s.name}”?`) && api.snippetDelete(s.id).then(load)}><Icon name="trash-2" size={13} /></Button>
+              <Button size="sm" variant="ghost" aria-label={`Delete ${s.name}`} onClick={() => confirm(`Delete “${s.name}”?`) && api.snippetDelete(s.id).then(load)}><Icon name="trash" size={13} /></Button>
             </div>
           ))
         )}

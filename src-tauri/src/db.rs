@@ -3,7 +3,7 @@
 
 use aes_gcm::aead::{Aead, KeyInit};
 use aes_gcm::{Aes256Gcm, Nonce};
-use inputflow_core::snippets::Snippet;
+use minpoint_core::snippets::Snippet;
 use rand::RngCore;
 use rusqlite::{params, Connection, OptionalExtension};
 use serde::Serialize;
@@ -96,7 +96,7 @@ impl Db {
     fn hash(&self, kind: &str, s: &str) -> String {
         // Keyed hash so the DB doesn't reveal content via unsalted digests.
         let mut h = Sha256::new();
-        h.update(b"inputflow-clip-v1");
+        h.update(b"minpoint-clip-v1");
         h.update(kind.as_bytes());
         h.update([0]);
         h.update(s.as_bytes());

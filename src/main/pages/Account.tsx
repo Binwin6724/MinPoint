@@ -55,7 +55,7 @@ export function Account() {
 
   return (
     <>
-      <PageHeader title="Connected Account" subtitle="Optional. Connect your ChatGPT account to power AI writing, translation and code explanations. Everything else in InputFlow works offline without an account." />
+      <PageHeader title="Connected Account" subtitle="Optional. Connect your ChatGPT account to power AI writing, translation and code explanations. Everything else in MinPoint works offline without an account." />
 
       {ai?.showWelcome && (
         <div className="mb-5 rounded-[10px] border border-accent/30 bg-accent/5 p-4">
@@ -78,19 +78,19 @@ export function Account() {
                   {ai?.planUsageAuthorized ? <Badge tone="ok">Plan usage authorized</Badge> : <Badge tone="warn">Plan usage not authorized</Badge>}
                 </div>
                 {ai?.email && ai?.name && <div className="text-[12.5px] text-muted">{ai.email}</div>}
-                <p className="mt-2 text-[12.5px] text-muted">Complete eligible AI requests in this app with usage included in your ChatGPT plan or credits balance. InputFlow itself is free and never charges you.</p>
+                <p className="mt-2 text-[12.5px] text-muted">Complete eligible AI requests in this app with usage included in your ChatGPT plan or credits balance. MinPoint itself is free and never charges you.</p>
               </>
             ) : (
               <>
                 <div className="text-[14px] font-semibold">Not connected</div>
                 <p className="mt-1 text-[12.5px] text-muted">
-                  Complete eligible AI requests in this app with usage included in your ChatGPT plan or credits balance. You sign in on OpenAI's website — InputFlow never sees your password and you never need an API key.
+                  Complete eligible AI requests in this app with usage included in your ChatGPT plan or credits balance. You sign in on OpenAI's website — MinPoint never sees your password and you never need an API key.
                 </p>
               </>
             )}
             {ai?.error && (
               <div className="mt-3 flex items-start gap-2 rounded-[8px] bg-bad/5 px-3 py-2 text-[12.5px] text-bad">
-                <Icon name="circle-alert" size={14} className="mt-[1px]" /> {ai.error}
+                <Icon name="triangle-exclamation-point" size={14} className="mt-[1px]" /> {ai.error}
               </div>
             )}
             {ai?.usageLimited && (
@@ -147,7 +147,7 @@ export function Account() {
         <Row icon="send" title="Only text you explicitly act on" description="The selected text (or your prompt) and the instruction for the action you chose. Nothing is sent in the background, and clipboard history is never sent automatically." />
         <Row icon="shield" title="Bounded, tool-less requests" description="Requests use OpenAI's Responses API with storage disabled. The model cannot run commands, read files or control your computer, and text inside your selection is treated as data, not instructions." />
         <Row icon="key-round" title="Credentials stay in your Keychain" description="Tokens are stored in the system credential store and never shown to the interface or written to logs." />
-        <Row icon="link-2-off" title="Disconnecting" description={<>Disconnect revokes InputFlow's access. You can also review connected apps in your ChatGPT settings.{" "}<button className="text-accent underline-offset-2 hover:underline" onClick={() => api.openExternal("openai_help")}>Learn more</button></>} />
+        <Row icon="link-2-off" title="Disconnecting" description={<>Disconnect revokes MinPoint's access. You can also review connected apps in your ChatGPT settings.{" "}<button className="text-accent underline-offset-2 hover:underline" onClick={() => api.openExternal("openai_help")}>Learn more</button></>} />
       </Section>
     </>
   );

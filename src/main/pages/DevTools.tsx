@@ -89,7 +89,7 @@ export function DevTools() {
       ))}
       <div className="mb-6 flex items-center gap-2">
         <div className="w-[110px] shrink-0 text-[12px] font-medium text-muted">Generate</div>
-        <Button size="sm" onClick={async () => setOutput(await api.devUuid())}><Icon name="fingerprint" size={13} /> UUID v4</Button>
+        <Button size="sm" onClick={async () => setOutput(await api.devUuid())}><Icon name="fingerprint-pattern" size={13} /> UUID v4</Button>
       </div>
 
       <div className="grid grid-cols-2 gap-5">

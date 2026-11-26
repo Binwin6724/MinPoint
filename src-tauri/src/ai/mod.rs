@@ -4,13 +4,13 @@
 //! Design decision: we use the documented *direct inference* route rather than the
 //! Codex app-server. Writing actions are single, tool-less text transformations;
 //! the app-server is an agent runtime with local shell/MCP tools, which is the
-//! opposite of the isolation InputFlow requires for selected text.
+//! opposite of the isolation MinPoint requires for selected text.
 
 pub mod auth;
 
 use auth::{Account, Registration, TokenSet};
 use futures_util::StreamExt;
-use inputflow_core::writing::AiRequest;
+use minpoint_core::writing::AiRequest;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::path::PathBuf;
@@ -83,7 +83,7 @@ fn now() -> i64 {
 impl AiService {
     pub fn new(config_dir: &std::path::Path) -> Self {
         let http = reqwest::Client::builder()
-            .user_agent(concat!("InputFlow/", env!("CARGO_PKG_VERSION")))
+            .user_agent(concat!("MinPoint/", env!("CARGO_PKG_VERSION")))
             .connect_timeout(Duration::from_secs(10))
             .build()
             .expect("http client");
@@ -130,7 +130,7 @@ impl AiService {
         s.email = t.account.email.clone();
         s.name = t.account.name.clone();
         s.plan_usage_authorized = t.scope.split_whitespace().any(|x| x == auth::PLAN_SCOPE);
-        s.error = if s.plan_usage_authorized { None } else { Some("Plan usage was not authorized. Reconnect and allow InputFlow to use your ChatGPT plan.".into()) };
+        s.error = if s.plan_usage_authorized { None } else { Some("Plan usage was not authorized. Reconnect and allow MinPoint to use your ChatGPT plan.".into()) };
         s.show_welcome = s.plan_usage_authorized && !self.welcome_path.exists();
     }
 
@@ -242,7 +242,7 @@ impl AiService {
     /// Return a valid access token, refreshing (serialised) when close to expiry.
     async fn access_token(&self) -> Result<String, AiError> {
         let mut guard = self.tokens.lock().await;
-        let t = guard.as_mut().ok_or_else(|| AiError::new("not_connected", "Connect your ChatGPT account in InputFlow → Connected Account."))?;
+        let t = guard.as_mut().ok_or_else(|| AiError::new("not_connected", "Connect your ChatGPT account in MinPoint → Connected Account."))?;
         if t.expires_at - now() > 120 {
             return Ok(t.access_token.clone());
         }
@@ -295,7 +295,7 @@ impl AiService {
         s.plan_usage_authorized = false;
         s.usage_limited = false;
         s.models.clear();
-        s.error = if confirmed { None } else { Some("Local credentials were removed, but revocation could not be confirmed. You can also disconnect InputFlow in ChatGPT Settings.".into()) };
+        s.error = if confirmed { None } else { Some("Local credentials were removed, but revocation could not be confirmed. You can also disconnect MinPoint in ChatGPT Settings.".into()) };
         Ok(confirmed)
     }
 
@@ -324,7 +324,7 @@ impl AiService {
     /// Stream a bounded transformation. `on_delta` receives text chunks as they arrive.
     pub async fn transform(&self, model: Option<&str>, req: &AiRequest, mut on_delta: impl FnMut(&str), cancel: tokio::sync::watch::Receiver<bool>) -> Result<String, AiError> {
         if !self.status.lock().unwrap().plan_usage_authorized {
-            return Err(AiError::new("plan_not_authorized", "InputFlow is not authorized to use your ChatGPT plan. Reconnect to allow it."));
+            return Err(AiError::new("plan_not_authorized", "MinPoint is not authorized to use your ChatGPT plan. Reconnect to allow it."));
         }
         let model = match model {
             Some(m) => m.to_string(),
@@ -430,7 +430,7 @@ fn friendly_oauth(e: &str) -> String {
         return "Could not reach OpenAI. Check your internet connection.".into();
     }
     if e.starts_with("oauth:invalid_client") {
-        return "OpenAI rejected InputFlow's client registration. Disconnect and connect again.".into();
+        return "OpenAI rejected MinPoint's client registration. Disconnect and connect again.".into();
     }
     let code = e.split(':').nth(1).unwrap_or("unknown");
     format!("Authorization failed ({code}).")
@@ -447,7 +447,7 @@ pub fn map_api_error(status: u16, body: &Value) -> AiError {
         "subscription_sharing_unsupported_capability" => AiError::new("unsupported", format!("This request uses an unsupported option ({param}).")),
         "subscription_sharing_invalid_user" => AiError::new("reauth", "Your ChatGPT authorization is no longer valid. Please reconnect."),
         "subscription_sharing_route_not_supported" | "chatpass_v2_scope_not_authorized" | "chatpass_v2_invalid_authorization_context" => {
-            AiError::new("config", "OpenAI rejected the request configuration. Please reconnect; if it persists, report an InputFlow bug.")
+            AiError::new("config", "OpenAI rejected the request configuration. Please reconnect; if it persists, report an MinPoint bug.")
         }
         _ => match status {
             401 => AiError::new("reauth", "ChatGPT rejected the credentials. Please reconnect."),

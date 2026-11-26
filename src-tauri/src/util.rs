@@ -39,7 +39,7 @@ pub fn process_usage(pid: u32) -> Option<(f64, f64)> {
 mod tests {
     #[test]
     fn atomic_write() {
-        let dir = std::env::temp_dir().join(format!("inputflow-test-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("minpoint-test-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let p = dir.join("x.json");
         super::write_atomic(&p, b"{}").unwrap();
@@ -49,6 +49,7 @@ mod tests {
             use std::os::unix::fs::PermissionsExt;
             assert_eq!(std::fs::metadata(&p).unwrap().permissions().mode() & 0o777, 0o600);
         }
+        #[cfg(unix)]
         assert!(super::process_usage(std::process::id()).is_some());
         std::fs::remove_dir_all(dir).unwrap();
     }

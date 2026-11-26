@@ -9,13 +9,13 @@ export function Icon({ name, size = 15, className = "", strokeWidth = 1.8 }: { n
 
 type BtnVariant = "primary" | "secondary" | "ghost" | "danger";
 export function Button({ variant = "secondary", size = "md", className = "", children, ...rest }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: BtnVariant; size?: "sm" | "md" }) {
-  const base = "inline-flex items-center justify-center gap-1.5 rounded-[7px] font-medium transition-colors disabled:opacity-45 disabled:pointer-events-none whitespace-nowrap";
-  const sizes = { sm: "h-7 px-2.5 text-[12px]", md: "h-8 px-3 text-[13px]" };
+  const base = "inline-flex items-center justify-center gap-1.5 border font-medium transition active:translate-y-px disabled:opacity-45 disabled:pointer-events-none whitespace-nowrap";
+  const sizes = { sm: "h-7 px-2.5 text-[12px] rounded-[8px]", md: "h-8 px-3.5 text-[13px] rounded-[9px]" };
   const variants: Record<BtnVariant, string> = {
-    primary: "bg-accent text-accent-fg hover:brightness-110 shadow-sm",
-    secondary: "bg-panel border border-line text-fg hover:bg-hover shadow-[0_1px_0_rgba(0,0,0,0.03)]",
-    ghost: "text-fg hover:bg-hover",
-    danger: "bg-panel border border-line text-bad hover:bg-bad/10",
+    primary: "btn-grad",
+    secondary: "bg-raised border-[var(--if-line-strong)] text-fg hover:bg-hover",
+    ghost: "border-transparent text-fg hover:bg-hover",
+    danger: "bg-raised border-bad/40 text-bad hover:bg-bad/10",
   };
   return (
     <button className={`${base} ${sizes[size]} ${variants[variant]} ${className}`} {...rest}>
@@ -32,19 +32,19 @@ export function Toggle({ checked, onChange, disabled, label }: { checked: boolea
       aria-label={label}
       disabled={disabled}
       onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-[22px] w-[38px] shrink-0 rounded-full transition-colors disabled:opacity-40 ${checked ? "bg-accent" : "bg-line"}`}
+      className={`relative inline-flex h-[22px] w-[38px] shrink-0 rounded-full transition-colors disabled:opacity-40 ${checked ? "bg-accent" : "bg-hover"}`}
     >
-      <span className={`absolute top-[2px] h-[18px] w-[18px] rounded-full bg-white shadow transition-transform ${checked ? "translate-x-[18px]" : "translate-x-[2px]"}`} />
+      <span className={`absolute top-[3px] h-[16px] w-[16px] rounded-full bg-white shadow transition-transform ${checked ? "translate-x-[19px]" : "translate-x-[3px]"}`} />
     </button>
   );
 }
 
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: ReactNode }) {
   return (
-    <div className="flex items-start justify-between gap-6 pb-5">
+    <div className="flex items-end justify-between gap-6 pb-5">
       <div>
-        <h1 className="text-[20px] font-semibold tracking-[-0.01em]">{title}</h1>
-        {subtitle && <p className="mt-1 max-w-[620px] text-[13px] text-muted">{subtitle}</p>}
+        <h1 className="text-[26px] font-bold tracking-[-0.02em]">{title}</h1>
+        {subtitle && <p className="mt-1 max-w-[640px] text-[13px] leading-relaxed text-muted">{subtitle}</p>}
       </div>
       {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
     </div>
@@ -57,13 +57,13 @@ export function Section({ title, description, children, right }: { title?: strin
       {(title || right) && (
         <div className="mb-2 flex items-end justify-between px-1">
           <div>
-            {title && <h2 className="text-[12px] font-semibold uppercase tracking-wide text-muted">{title}</h2>}
+            {title && <h2 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-faint">{title}</h2>}
             {description && <p className="mt-0.5 text-[12px] text-faint">{description}</p>}
           </div>
           {right}
         </div>
       )}
-      <div className="overflow-hidden rounded-[10px] border border-line bg-panel">{children}</div>
+      <div className="card overflow-hidden">{children}</div>
     </section>
   );
 }
@@ -72,7 +72,7 @@ export function Row({ title, description, children, icon }: { title: ReactNode; 
   return (
     <div className="flex items-center gap-3 border-b border-line px-4 py-3 last:border-b-0">
       {icon && (
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] bg-raised text-muted">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] bg-raised text-accent">
           <Icon name={icon} size={15} />
         </div>
       )}
@@ -87,7 +87,7 @@ export function Row({ title, description, children, icon }: { title: ReactNode; 
 
 export function Badge({ tone = "neutral", children }: { tone?: "neutral" | "ok" | "warn" | "bad" | "accent"; children: ReactNode }) {
   const tones = {
-    neutral: "bg-raised text-muted border-line",
+    neutral: "bg-hover text-muted border-transparent",
     ok: "bg-ok/10 text-ok border-ok/25",
     warn: "bg-warn/10 text-warn border-warn/25",
     bad: "bg-bad/10 text-bad border-bad/25",
@@ -171,7 +171,7 @@ export function ShortcutRecorder({ value, onChange }: { value: string; onChange:
       <button
         ref={ref}
         onClick={() => setRecording((r) => !r)}
-        className={`h-7 min-w-[110px] rounded-[7px] border px-2.5 text-[12px] font-medium ${recording ? "border-accent bg-accent/10 text-accent" : "border-line bg-raised text-fg hover:bg-hover"}`}
+        className={`h-7 min-w-[110px] rounded-[8px] border px-2.5 text-[12px] font-medium ${recording ? "border-accent bg-accent/10 text-accent" : "border-line bg-raised text-fg hover:bg-hover"}`}
         aria-label={recording ? "Press a key combination" : `Shortcut ${value || "not set"}; click to change`}
       >
         {recording ? "Press keys…" : prettyAccelerator(value)}
@@ -196,6 +196,7 @@ export function useTheme(settings: { theme: string; accent: string; fontScale: n
     };
     apply();
     root.style.setProperty("--if-accent", settings.accent);
+    root.style.setProperty("--if-accent-b", settings.accent.toLowerCase() === "#ff7a45" ? "#ff4f9a" : `color-mix(in srgb, ${settings.accent} 70%, #ffffff)`);
     root.style.setProperty("--if-font-scale", String(settings.fontScale));
     root.dataset.motion = settings.reduceMotion ? "reduce" : "full";
     root.dataset.contrast = settings.highContrast ? "high" : "normal";

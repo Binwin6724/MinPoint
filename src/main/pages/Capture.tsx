@@ -53,9 +53,9 @@ export function Screenshots() {
       </Section>
       <Section title="After capture">
         <Row title="Copy to clipboard"><Toggle label="Copy to clipboard" checked={settings.screenshot.copyToClipboard} onChange={(v) => update((s) => void (s.screenshot.copyToClipboard = v))} /></Row>
-        <Row title="Save to disk" description={settings.screenshot.saveDir || "Pictures/InputFlow"}><Toggle label="Save to disk" checked={settings.screenshot.saveToDisk} onChange={(v) => update((s) => void (s.screenshot.saveToDisk = v))} /></Row>
-        <Row title="Save folder" description="Leave empty to use Pictures/InputFlow.">
-          <input className="field w-[280px]" value={settings.screenshot.saveDir} placeholder="~/Pictures/InputFlow" onChange={(e) => update((s) => void (s.screenshot.saveDir = e.target.value))} aria-label="Save folder" />
+        <Row title="Save to disk" description={settings.screenshot.saveDir || "Pictures/MinPoint"}><Toggle label="Save to disk" checked={settings.screenshot.saveToDisk} onChange={(v) => update((s) => void (s.screenshot.saveToDisk = v))} /></Row>
+        <Row title="Save folder" description="Leave empty to use Pictures/MinPoint.">
+          <input className="field w-[280px]" value={settings.screenshot.saveDir} placeholder="~/Pictures/MinPoint" onChange={(e) => update((s) => void (s.screenshot.saveDir = e.target.value))} aria-label="Save folder" />
         </Row>
       </Section>
       <Section title="Annotation">

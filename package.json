@@ -1,9 +1,9 @@
 {
-  "name": "inputflow",
+  "name": "minpoint",
   "private": true,
   "version": "0.1.0",
-  "description": "InputFlow — Your Computer. Your Controls.",
-  "license": "MIT OR Apache-2.0",
+  "description": "MinPoint — Your Computer. Your Controls.",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",

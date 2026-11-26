@@ -5,11 +5,11 @@
 use crate::ai::{AiError, AiService};
 use crate::db::Db;
 use crate::platform::{AppInfo, PlatformAdapter};
-use inputflow_core::actions::{builtin_actions, ActionDef, ActionKind, Builtin, Capability};
-use inputflow_core::menu::{self, MenuContext, MenuEntry};
-use inputflow_core::settings::Settings;
-use inputflow_core::snippets::{self, TriggerBuffer, VariableSource};
-use inputflow_core::writing::{self, WritingOp, WritingOptions};
+use minpoint_core::actions::{builtin_actions, ActionDef, ActionKind, Builtin, Capability};
+use minpoint_core::menu::{self, MenuContext, MenuEntry};
+use minpoint_core::settings::Settings;
+use minpoint_core::snippets::{self, TriggerBuffer, VariableSource};
+use minpoint_core::writing::{self, WritingOp, WritingOptions};
 use serde::Serialize;
 use serde_json::{json, Value};
 use std::path::PathBuf;
@@ -18,7 +18,7 @@ use std::sync::{Arc, Mutex, RwLock};
 use std::time::Duration;
 use tauri::{AppHandle, Emitter, LogicalPosition, LogicalSize, Manager, WebviewWindow};
 
-/// Context captured at the moment the user invoked InputFlow (before our UI took focus).
+/// Context captured at the moment the user invoked MinPoint (before our UI took focus).
 #[derive(Debug, Clone, Default, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Invocation {
@@ -213,7 +213,7 @@ impl Runtime {
         let focus = match self.platform.focus_info() {
             Ok(f) => f,
             Err(e) => {
-                self.toast(&format!("InputFlow can't read the focused app: {e}"), "error");
+                self.toast(&format!("MinPoint can't read the focused app: {e}"), "error");
                 return;
             }
         };
@@ -277,7 +277,7 @@ impl Runtime {
         let caps = self.capabilities();
         if let Some(missing) = action.capabilities.iter().find(|c| !caps.contains(c)) {
             return Err(if *missing == Capability::AiConnection {
-                "Connect your ChatGPT account first (InputFlow → Connected Account).".into()
+                "Connect your ChatGPT account first (MinPoint → Connected Account).".into()
             } else {
                 format!("{} isn't available on this system ({missing:?}).", action.name)
             });
@@ -300,13 +300,13 @@ impl Runtime {
                 Ok(())
             }
             ActionKind::Text(op) => {
-                let out = inputflow_core::text::apply(*op, &sel);
+                let out = minpoint_core::text::apply(*op, &sel);
                 self.show_local_preview(&action.name, &sel, &out, true);
                 Ok(())
             }
             ActionKind::Dev(op) => {
-                match inputflow_core::devtools::apply(*op, &sel) {
-                    Ok(out) => self.show_local_preview(&action.name, &sel, &out, !matches!(op, inputflow_core::devtools::DevOp::JsonValidate)),
+                match minpoint_core::devtools::apply(*op, &sel) {
+                    Ok(out) => self.show_local_preview(&action.name, &sel, &out, !matches!(op, minpoint_core::devtools::DevOp::JsonValidate)),
                     Err(e) => self.show_local_preview(&action.name, &sel, &e, false),
                 }
                 Ok(())
@@ -371,10 +371,10 @@ impl Runtime {
         });
     }
 
-    /// Run an action on text that InputFlow itself produced (e.g. OCR output).
+    /// Run an action on text that MinPoint itself produced (e.g. OCR output).
     /// There is no insertion target, so results can only be copied.
     pub fn run_on_text(self: &Arc<Self>, id: &str, text: String, params: Value) -> Result<(), String> {
-        *self.invocation.lock().unwrap() = Some(Invocation { selection_len: text.chars().count(), selection: text, selection_source: "inputflow".into(), ..Default::default() });
+        *self.invocation.lock().unwrap() = Some(Invocation { selection_len: text.chars().count(), selection: text, selection_source: "minpoint".into(), ..Default::default() });
         self.run_action(id, params)
     }
 
@@ -426,7 +426,7 @@ impl Runtime {
         if inv.selection_source == "accessibility" && !inv.selection.is_empty() {
             if let Ok(now) = self.platform.get_selection(false) {
                 if now.source == "accessibility" && now.text != inv.selection {
-                    return Err("The selection changed while InputFlow was working. Copy the result instead.".into());
+                    return Err("The selection changed while MinPoint was working. Copy the result instead.".into());
                 }
             }
         }
@@ -471,15 +471,15 @@ impl Runtime {
                 let t = match b {
                     InsertDate => now.format("%Y-%m-%d").to_string(),
                     InsertTime => now.format("%H:%M").to_string(),
-                    _ => inputflow_core::devtools::uuid_v4(),
+                    _ => minpoint_core::devtools::uuid_v4(),
                 };
                 self.accept(&t)?;
             }
             Calculate => {
-                let res = if let Some(c) = inputflow_core::units::parse_and_convert(sel) {
-                    Ok(inputflow_core::calc::format_number((c.result * 1e6).round() / 1e6))
+                let res = if let Some(c) = minpoint_core::units::parse_and_convert(sel) {
+                    Ok(minpoint_core::calc::format_number((c.result * 1e6).round() / 1e6))
                 } else {
-                    inputflow_core::calc::evaluate(sel).map(inputflow_core::calc::format_number).map_err(|e| e.to_string())
+                    minpoint_core::calc::evaluate(sel).map(minpoint_core::calc::format_number).map_err(|e| e.to_string())
                 };
                 match res {
                     Ok(v) => self.show_local_preview("Calculate", sel, &v, true),
@@ -487,7 +487,7 @@ impl Runtime {
                 }
             }
             TextStats => {
-                let s = inputflow_core::text::stats(sel);
+                let s = minpoint_core::text::stats(sel);
                 let out = format!(
                     "Words: {}\nCharacters: {}\nCharacters (no spaces): {}\nLines: {}\nSentences: {}\nReading time: ~{}s",
                     s.words, s.characters, s.characters_no_spaces, s.lines, s.sentences, s.reading_seconds
@@ -547,7 +547,7 @@ impl Runtime {
                 self.platform.launch_app(path)?;
                 self.hide_overlay();
             }
-            PauseInputFlow => self.set_paused(true),
+            PauseMinPoint => self.set_paused(true),
             StartVoiceTyping => return Err("Voice typing is not available in this build yet.".into()),
         }
         Ok(())
@@ -609,7 +609,7 @@ impl Runtime {
         }
         if s.save_to_disk {
             let dir = if s.save_dir.is_empty() {
-                self.app.path().picture_dir().map_err(|e| e.to_string())?.join("InputFlow")
+                self.app.path().picture_dir().map_err(|e| e.to_string())?.join("MinPoint")
             } else {
                 PathBuf::from(&s.save_dir)
             };
@@ -745,7 +745,7 @@ impl VariableSource for VarSrc<'_> {
 
 /// True when there is a real app/field to insert into (not OCR output or a launcher with no target).
 fn has_target(inv: &Invocation) -> bool {
-    inv.app.pid > 0 && !inv.secure && inv.selection_source != "inputflow" && (inv.editable || !inv.selection.is_empty())
+    inv.app.pid > 0 && !inv.secure && inv.selection_source != "minpoint" && (inv.editable || !inv.selection.is_empty())
 }
 
 fn add_custom_actions(actions: &mut Vec<ActionDef>, s: &Settings) {

@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "InputFlow",
+  "productName": "MinPoint",
   "version": "0.1.0",
-  "identifier": "app.inputflow.desktop",
+  "identifier": "app.minpoint.desktop",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "InputFlow",
+        "title": "MinPoint",
         "url": "index.html",
         "width": 1120,
         "height": 760,
@@ -26,7 +26,7 @@
       },
       {
         "label": "overlay",
-        "title": "InputFlow Overlay",
+        "title": "MinPoint Overlay",
         "url": "index.html#/overlay",
         "width": 300,
         "height": 420,
@@ -47,10 +47,14 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": [
+      "app",
+      "dmg",
+      "nsis"
+    ],
     "category": "Productivity",
     "shortDescription": "Your Computer. Your Controls.",
-    "copyright": "InputFlow contributors",
+    "copyright": "MinPoint contributors",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -60,7 +64,13 @@
     ],
     "windows": {
       "certificateThumbprint": null,
-      "digestAlgorithm": "sha256"
+      "digestAlgorithm": "sha256",
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      },
+      "nsis": {
+        "installMode": "currentUser"
+      }
     }
   }
 }

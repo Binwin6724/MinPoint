@@ -8,23 +8,23 @@ const INFO: Record<string, { title: string; subtitle: string; icon: string; plan
     subtitle: "Key remapping, modifier remapping, Caps Lock behaviour, per-app shortcuts and long-press / double-press actions.",
     icon: "keyboard",
     plan: [
-      ["Remapping engine", "CGEventTap on macOS / low-level keyboard hook on Windows, with loop protection (events InputFlow synthesises are tagged and ignored)."],
+      ["Remapping engine", "CGEventTap on macOS / low-level keyboard hook on Windows, with loop protection (events MinPoint synthesises are tagged and ignored)."],
       ["Visual keyboard", "Pick a key on an on-screen layout and choose what it does."],
       ["Conflict detection", "Shortcut conflict checks already run for global shortcuts in this build."],
-      ["Crash safety", "Remaps live in the native helper; if InputFlow quits or crashes, the helper exits and normal input returns immediately."],
+      ["Crash safety", "Remaps live in the native helper; if MinPoint quits or crashes, the helper exits and normal input returns immediately."],
     ],
-    notes: "Available today: global shortcuts for InputFlow actions (Settings → Global shortcuts, Window Manager, Quick Launcher) and the emergency pause shortcut.",
+    notes: "Available today: global shortcuts for MinPoint actions (Settings → Global shortcuts, Window Manager, Quick Launcher) and the emergency pause shortcut.",
   },
   mouse: {
     title: "Mouse Studio",
     subtitle: "Button remapping, side-button actions, scroll speed and direction, gestures and per-app mappings.",
     icon: "mouse",
     plan: [
-      ["Button remapping", "Middle/side buttons → InputFlow actions, shortcuts, media keys, window actions."],
+      ["Button remapping", "Middle/side buttons → MinPoint actions, shortcuts, media keys, window actions."],
       ["Scrolling", "Speed, reverse direction per device, horizontal scrolling with a modifier."],
       ["Hardware honesty", "DPI and polling rate are shown only where a supported interface exists."],
     ],
-    notes: "Available today: Shift + Right Click opens the InputFlow menu without affecting your normal right-click.",
+    notes: "Available today: Shift + Right Click opens the MinPoint menu without affecting your normal right-click.",
   },
   trackpad: {
     title: "Trackpad Studio",
@@ -32,7 +32,7 @@ const INFO: Record<string, { title: string; subtitle: string; icon: string; plan
     icon: "hand",
     plan: [
       ["Research first", "macOS exposes no public API for custom multi-finger gestures system-wide; Windows Precision Touchpad gestures are configurable only through OS settings."],
-      ["No private APIs", "InputFlow won't use private frameworks or drivers to claim gestures it can't support reliably. Unsupported gestures will be clearly marked."],
+      ["No private APIs", "MinPoint won't use private frameworks or drivers to claim gestures it can't support reliably. Unsupported gestures will be clearly marked."],
     ],
     notes: "This module may ship with a limited, capability-aware gesture set.",
   },
@@ -49,7 +49,7 @@ const INFO: Record<string, { title: string; subtitle: string; icon: string; plan
   },
   automation: {
     title: "Automation Studio",
-    subtitle: "Build and record macros: open apps, press shortcuts, insert text, wait, click, scroll and run InputFlow actions.",
+    subtitle: "Build and record macros: open apps, press shortcuts, insert text, wait, click, scroll and run MinPoint actions.",
     icon: "workflow",
     plan: [
       ["Safety limits", "Step and time limits, an always-on emergency stop, recursion guards, and no shell commands."],

@@ -48,7 +48,7 @@ impl HelperClient {
         let pending = self.pending.clone();
         let on_event = self.on_event.clone();
         std::thread::Builder::new()
-            .name("inputflow-helper-reader".into())
+            .name("minpoint-helper-reader".into())
             .spawn(move || {
                 for line in BufReader::new(stdout).lines() {
                     let Ok(line) = line else { break };

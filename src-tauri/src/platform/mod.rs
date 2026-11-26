@@ -7,7 +7,7 @@ pub mod helper;
 pub mod macos;
 pub mod unsupported;
 
-use inputflow_core::actions::Capability;
+use minpoint_core::actions::Capability;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 

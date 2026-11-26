@@ -1,0 +1,111 @@
+name: CI
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: mac-arm64
+            os: macos-15
+            target: aarch64-apple-darwin
+          - name: mac-x64
+            os: macos-15-intel
+            target: x86_64-apple-darwin
+          - name: win-x64
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.name }}
+      - run: npm ci
+
+      # The macOS native helper (Swift) ships inside the app as a sidecar.
+      - name: Build native helper (macOS)
+        if: runner.os == 'macOS'
+        run: npm run helper:mac
+
+      - name: Unit tests
+        shell: bash
+        run: |
+          npm run build
+          npm test
+          cargo test --workspace
+
+      - name: Package
+        run: npx tauri build --target ${{ matrix.target }}
+
+      - name: Collect installer
+        shell: bash
+        run: |
+          version=$(node -p "require('./package.json').version")
+          mkdir -p release
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            cp target/${{ matrix.target }}/release/bundle/nsis/*-setup.exe "release/MinPoint-${version}-win-x64-setup.exe"
+          else
+            app="target/${{ matrix.target }}/release/bundle/macos/MinPoint.app"
+            test -x "$app/Contents/MacOS/minpoint-helper"   # helper must be inside the app
+            codesign --verify --deep "$app" && echo "ad-hoc signature ok"
+            cp target/${{ matrix.target }}/release/bundle/dmg/*.dmg "release/MinPoint-${version}-${{ matrix.name }}.dmg"
+          fi
+          ls -la release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MinPoint-${{ matrix.name }}
+          path: release/*
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd dist
+          sha256sum * > SHA256SUMS.txt
+          ls -la
+          v=${GITHUB_REF_NAME#v}
+          notes="Download the installer for your computer:
+
+          | Computer | File |
+          |---|---|
+          | Mac with Apple silicon (M1–M5) | \`MinPoint-${v}-mac-arm64.dmg\` |
+          | Mac with Intel processor | \`MinPoint-${v}-mac-x64.dmg\` |
+          | Windows 10 / 11 (64-bit) | \`MinPoint-${v}-win-x64-setup.exe\` |
+
+          **macOS first launch:** open the DMG, drag MinPoint into Applications, then right-click MinPoint ▸ Open (the app is ad-hoc signed, not notarized yet). Shift + Right Click needs **Accessibility** and **Input Monitoring**; MinPoint asks when you turn the feature on.
+          **Windows:** SmartScreen may warn because the installer isn't code-signed: More info ▸ Run anyway. On Windows this early build has the in-app tools only; the system-wide menu, text insertion, OCR and clipboard history are macOS-only for now.
+
+          Checksums are in \`SHA256SUMS.txt\`. See the [README](https://github.com/${GITHUB_REPOSITORY}#readme) for details."
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" * --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$GITHUB_REF_NAME" * --repo "$GITHUB_REPOSITORY" --title "MinPoint ${v}" --notes "$notes"
+          fi

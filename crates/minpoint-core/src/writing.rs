@@ -111,7 +111,7 @@ impl WritingOp {
 pub struct WritingOptions {
     #[serde(default)]
     pub target_language: Option<String>,
-    /// Extra instructions supplied by the *user* in InputFlow's UI (trusted).
+    /// Extra instructions supplied by the *user* in MinPoint's UI (trusted).
     #[serde(default)]
     pub custom_instructions: Option<String>,
     /// Optional output-style for voice mode, e.g. "professional English email".
@@ -153,7 +153,7 @@ pub fn build_request(op: WritingOp, text: &str, opts: &WritingOptions) -> Result
     // Neutralise any attempt to close our delimiter from inside the data.
     let safe = text.replace("</user_text>", "<\\/user_text>").replace("<user_text>", "<\\user_text>");
     let input = if op == WritingOp::Generate {
-        // For generation the "text" is the user's own prompt typed into InputFlow (trusted),
+        // For generation the "text" is the user's own prompt typed into MinPoint (trusted),
         // but we still delimit it.
         format!("Request:\n<user_text>\n{safe}\n</user_text>")
     } else {

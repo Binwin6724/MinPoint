@@ -1,4 +1,4 @@
-// Generates src/components/icons.gen.ts with only the Lucide icons InputFlow references
+// Generates src/components/icons.gen.ts with only the Lucide icons MinPoint references
 // (in the React sources and in the Rust action registry). Run: node scripts/gen-icons.mjs
 import { readFileSync, writeFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
@@ -9,7 +9,7 @@ const kebab = (s) => s.replace(/([a-z0-9])([A-Z])/g, "$1-$2").replace(/([A-Za-z]
 const byKebab = new Map(Object.keys(icons).map((k) => [kebab(k), k]));
 const files = [];
 const walk = (d) => readdirSync(d).forEach((f) => { const p = join(d, f); statSync(p).isDirectory() ? walk(p) : /\.(tsx?|rs)$/.test(f) && files.push(p); });
-["src", "crates/inputflow-core/src", "src-tauri/src"].forEach(walk);
+["src", "crates/minpoint-core/src", "src-tauri/src"].forEach(walk);
 const used = new Set();
 for (const f of files) for (const m of readFileSync(f, "utf8").matchAll(/"([a-z][a-z0-9-]*)"/g)) if (byKebab.has(m[1])) used.add(m[1]);
 const names = [...used].sort();

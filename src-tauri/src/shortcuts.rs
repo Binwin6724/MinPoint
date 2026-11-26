@@ -1,7 +1,7 @@
 //! Global shortcut registration from settings (action id -> accelerator).
 
 use crate::runtime::Rt;
-use inputflow_core::settings::Settings;
+use minpoint_core::settings::Settings;
 use serde::Serialize;
 use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
@@ -52,7 +52,7 @@ pub fn register_all(app: &AppHandle, s: &Settings) {
         }
         // The emergency shortcut stays active even while paused; everything else is skipped.
         if s.general.paused && action_id != "app.emergency_disable" {
-            statuses.push(ShortcutStatus { action_id: action_id.clone(), accelerator: acc.clone(), registered: false, error: Some("InputFlow is paused".into()) });
+            statuses.push(ShortcutStatus { action_id: action_id.clone(), accelerator: acc.clone(), registered: false, error: Some("MinPoint is paused".into()) });
             continue;
         }
         let id = action_id.clone();
@@ -81,7 +81,7 @@ fn dispatch(rt: &Rt, id: &str) {
         "app.emergency_disable" => {
             let paused = !rt.settings().general.paused;
             rt.set_paused(paused);
-            rt.toast(if paused { "InputFlow paused — all remaps and hooks released" } else { "InputFlow resumed" }, "info");
+            rt.toast(if paused { "MinPoint paused — all remaps and hooks released" } else { "MinPoint resumed" }, "info");
         }
         "menu.open" => rt.open_context_menu(None),
         "launcher.open" => rt.open_launcher(),

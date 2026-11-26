@@ -1,4 +1,4 @@
-//! InputFlow desktop app (Tauri 2).
+//! MinPoint desktop app (Tauri 2).
 
 mod ai;
 mod commands;
@@ -10,7 +10,7 @@ mod shortcuts;
 mod tray;
 mod util;
 
-use inputflow_core::settings::Settings;
+use minpoint_core::settings::Settings;
 use platform::PlatformAdapter;
 use runtime::{Rt, Runtime};
 use std::sync::{Arc, Mutex, OnceLock};
@@ -55,12 +55,12 @@ fn load_settings(path: &std::path::Path) -> Settings {
 #[cfg(target_os = "macos")]
 fn helper_path() -> std::path::PathBuf {
     let exe_dir = std::env::current_exe().ok().and_then(|p| p.parent().map(|p| p.to_path_buf())).unwrap_or_default();
-    let bundled = exe_dir.join("inputflow-helper");
+    let bundled = exe_dir.join("minpoint-helper");
     if bundled.exists() {
         return bundled;
     }
     // Development fallback (cargo run without bundling).
-    std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../native/macos/build/inputflow-helper")
+    std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../native/macos/build/minpoint-helper")
 }
 
 fn make_platform(event_sink: Arc<OnceLock<Rt>>) -> Arc<dyn PlatformAdapter> {
@@ -76,7 +76,7 @@ fn make_platform(event_sink: Arc<OnceLock<Rt>>) -> Arc<dyn PlatformAdapter> {
             Ok(h) => return Arc::new(platform::macos::MacAdapter { helper: h }),
             Err(e) => {
                 log::error!("{e}");
-                return Arc::new(platform::unsupported::UnsupportedAdapter { reason: format!("InputFlow's native helper could not start: {e}") });
+                return Arc::new(platform::unsupported::UnsupportedAdapter { reason: format!("MinPoint's native helper could not start: {e}") });
             }
         }
     }
@@ -113,7 +113,7 @@ pub fn run() {
                 rand::RngCore::fill_bytes(&mut rand::thread_rng(), &mut k);
                 k
             });
-            let db = db::Db::open(&data_dir.join("inputflow.db"), &key).map_err(|e| Box::<dyn std::error::Error>::from(e))?;
+            let db = db::Db::open(&data_dir.join("minpoint.db"), &key).map_err(|e| Box::<dyn std::error::Error>::from(e))?;
             let ai = ai::AiService::new(&config_dir);
             let platform = make_platform(sink_setup.clone());
             let rt = Runtime::new(handle.clone(), platform, settings.clone(), settings_path, db, ai);
@@ -217,7 +217,7 @@ pub fn run() {
             commands::hide_main,
         ])
         .build(tauri::generate_context!())
-        .expect("error while building InputFlow");
+        .expect("error while building MinPoint");
 
     app.run(|app, ev| match ev {
         RunEvent::ExitRequested { api, code, .. } => {

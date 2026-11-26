@@ -1,7 +1,7 @@
 import { useStore } from "../store";
 import { PageHeader, Row, Section, Toggle } from "../../components/ui";
 
-const ACCENTS = ["#5b6cff", "#0a84ff", "#30b0c7", "#34c759", "#ff9f0a", "#ff375f", "#bf5af2", "#8e8e93"];
+const ACCENTS = ["#ff7a45", "#ff4f9a", "#2f80ff", "#7c5cff", "#14d3a0", "#f5a524", "#ef4458", "#8e8e93"];
 
 export function Appearance() {
   const { settings, update } = useStore();
@@ -33,7 +33,7 @@ export function Appearance() {
         <Row title="Compact menu" description="Tighter rows in the Shift + Right Click menu."><Toggle label="Compact menu" checked={a.compact} onChange={(v) => update((s) => void (s.appearance.compact = v))} /></Row>
       </Section>
       <Section title="Accessibility">
-        <Row title="Reduce motion" description="Turns off animations. InputFlow also follows the system setting."><Toggle label="Reduce motion" checked={a.reduceMotion} onChange={(v) => update((s) => void (s.appearance.reduceMotion = v))} /></Row>
+        <Row title="Reduce motion" description="Turns off animations. MinPoint also follows the system setting."><Toggle label="Reduce motion" checked={a.reduceMotion} onChange={(v) => update((s) => void (s.appearance.reduceMotion = v))} /></Row>
         <Row title="Increase contrast" description="Stronger borders and text."><Toggle label="Increase contrast" checked={a.highContrast} onChange={(v) => update((s) => void (s.appearance.highContrast = v))} /></Row>
       </Section>
     </>

@@ -5,8 +5,8 @@
   <key>LSUIElement</key>
   <false/>
   <key>NSMicrophoneUsageDescription</key>
-  <string>InputFlow uses the microphone only while you are actively voice typing. Audio is transcribed on this Mac and never uploaded.</string>
+  <string>MinPoint uses the microphone only while you are actively voice typing. Audio is transcribed on this Mac and never uploaded.</string>
   <key>NSAppleEventsUsageDescription</key>
-  <string>InputFlow does not send Apple Events to other apps.</string>
+  <string>MinPoint does not send Apple Events to other apps.</string>
 </dict>
 </plist>

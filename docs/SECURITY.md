@@ -1,6 +1,6 @@
 # Security
 
-InputFlow can see the screen, read selections and synthesise input. Every one of those capabilities is constrained below.
+MinPoint can see the screen, read selections and synthesise input. Every one of those capabilities is constrained below.
 
 ## Trust boundaries
 

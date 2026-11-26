@@ -23,11 +23,11 @@ export function SettingsPage() {
 
   return (
     <>
-      <PageHeader title="Settings" subtitle={`InputFlow ${boot.version} · ${boot.os}`} actions={<input className="field w-[220px]" placeholder="Search settings" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search settings" />} />
+      <PageHeader title="Settings" subtitle={`MinPoint ${boot.version} · ${boot.os}`} actions={<input className="field w-[220px]" placeholder="Search settings" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search settings" />} />
 
       {show("general startup login close menu bar background") && (
         <Section title="General">
-          <Row title="Open at login" description="Start InputFlow in the menu bar when you log in.">
+          <Row title="Open at login" description="Start MinPoint in the menu bar when you log in.">
             <Toggle label="Open at login" checked={settings.general.launchAtLogin} onChange={(v) => api.setLaunchAtLogin(v).then((on) => update((s) => void (s.general.launchAtLogin = on))).catch((e) => toast(errorText(e), "error"))} />
           </Row>
           <Row title="Keep running when the window is closed" description="Shortcuts, the context menu and clipboard history keep working from the menu bar.">
@@ -38,7 +38,7 @@ export function SettingsPage() {
 
       {show("shortcut emergency pause keyboard hotkey") && (
         <Section title="Global shortcuts" description="Shortcuts that conflict with the system or each other are not registered.">
-          <Row title="Emergency pause" description="Instantly releases every InputFlow hook and shortcut. Press again to resume. Always active.">
+          <Row title="Emergency pause" description="Instantly releases every MinPoint hook and shortcut. Press again to resume. Always active.">
             <ShortcutRecorder value={settings.shortcuts["app.emergency_disable"] ?? ""} onChange={(v) => update((s) => void (s.shortcuts["app.emergency_disable"] = v))} />
           </Row>
           <Row title="Quick Launcher"><ShortcutRecorder value={settings.shortcuts["launcher.open"] ?? ""} onChange={(v) => update((s) => void (s.shortcuts["launcher.open"] = v))} /></Row>
@@ -67,7 +67,7 @@ export function SettingsPage() {
             <input type="range" min={0} max={1} step={0.05} value={settings.speech.volume} onChange={(e) => update((s) => void (s.speech.volume = Number(e.target.value)))} className="w-[200px] accent-[var(--if-accent)]" aria-label="Volume" />
           </Row>
           <Row title="Try it">
-            <Button size="sm" onClick={() => api.speak("InputFlow. Your computer, your controls.").catch((e) => toast(errorText(e), "error"))}>Play sample</Button>
+            <Button size="sm" onClick={() => api.speak("MinPoint. Your computer, your controls.").catch((e) => toast(errorText(e), "error"))}>Play sample</Button>
             <Button size="sm" variant="ghost" onClick={() => api.speechControl("stop")}>Stop</Button>
           </Row>
         </Section>
@@ -76,7 +76,7 @@ export function SettingsPage() {
       {show("export import backup configuration") && (
         <Section title="Backup">
           <Row title="Export configuration" description="Settings, profiles, custom actions and snippets as a JSON file. Contains no clipboard history or credentials.">
-            <Button size="sm" onClick={async () => download("inputflow-config.json", await api.exportConfig())}>Export…</Button>
+            <Button size="sm" onClick={async () => download("minpoint-config.json", await api.exportConfig())}>Export…</Button>
           </Row>
           <Row title="Import configuration" description="Imported files are data only. They can't turn on clipboard history, text expansion or auto-replace for you.">
             <label className="inline-flex h-7 cursor-pointer items-center rounded-[7px] border border-line bg-panel px-2.5 text-[12px] font-medium hover:bg-hover">
@@ -108,12 +108,12 @@ export function PrivacyCenter() {
   };
   return (
     <>
-      <PageHeader title="Privacy Center" subtitle="InputFlow keeps everything on this computer. Nothing is uploaded unless you run a ChatGPT action, and then only the text you chose." />
+      <PageHeader title="Privacy Center" subtitle="MinPoint keeps everything on this computer. Nothing is uploaded unless you run a ChatGPT action, and then only the text you chose." />
       <Section title="What's stored on this computer">
         <Row icon="clipboard-list" title="Clipboard history" description={settings.clipboard.historyEnabled ? `${status?.clipboardItems ?? 0} items, encrypted with a key kept in your Keychain` : "Off — nothing recorded"}>
           <Button size="sm" variant="danger" onClick={() => confirm("Delete all clipboard history?") && run(api.clipboardClear(false), "Clipboard history deleted")}>Clear</Button>
         </Row>
-        <Row icon="history" title="Activity" description="Which actions you used and how often — never the text involved. Powers ‘Recently used’ and launcher ranking.">
+        <Row icon="clock" title="Activity" description="Which actions you used and how often — never the text involved. Powers ‘Recently used’ and launcher ranking.">
           <Button size="sm" onClick={() => run(api.clearActivity(), "Activity cleared")}>Clear</Button>
         </Row>
         <Row icon="text-cursor-input" title="Snippets & settings" description={`${status?.snippets ?? 0} snippets, plus your preferences.`} />
@@ -127,13 +127,13 @@ export function PrivacyCenter() {
         <Row icon="ban" title="Nothing else" description="No telemetry, analytics, ads, crash reporting or cloud sync." />
       </Section>
       <Section title="Controls">
-        <Row icon="power" title="Pause InputFlow" description="Releases every hook and shortcut except the emergency shortcut.">
+        <Row icon="power" title="Pause MinPoint" description="Releases every hook and shortcut except the emergency shortcut.">
           <Toggle label="Pause" checked={settings.general.paused} onChange={(v) => update((s) => void (s.general.paused = v))} />
         </Row>
         <Row icon="shield-check" title="Review permissions"><Button size="sm" onClick={() => setPage("permissions")}>Open</Button></Row>
         <Row icon="app-window" title="Excluded apps" description={`${settings.general.excludedApps.length} apps excluded completely`}><Button size="sm" onClick={() => setPage("profiles")}>Edit</Button></Row>
-        <Row icon="trash-2" title="Delete all InputFlow data" description="Disconnects ChatGPT, deletes clipboard history, activity and snippets, and resets settings. Can't be undone.">
-          <Button size="sm" variant="danger" onClick={() => confirm("Delete ALL InputFlow data and reset settings? This can't be undone.") && run(api.deleteAllData().then(() => setTimeout(() => location.reload(), 600)), "All data deleted")}>Delete everything</Button>
+        <Row icon="trash" title="Delete all MinPoint data" description="Disconnects ChatGPT, deletes clipboard history, activity and snippets, and resets settings. Can't be undone.">
+          <Button size="sm" variant="danger" onClick={() => confirm("Delete ALL MinPoint data and reset settings? This can't be undone.") && run(api.deleteAllData().then(() => setTimeout(() => location.reload(), 600)), "All data deleted")}>Delete everything</Button>
         </Row>
       </Section>
     </>

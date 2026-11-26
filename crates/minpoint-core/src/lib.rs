@@ -1,4 +1,4 @@
-//! InputFlow core engine — platform independent, no I/O, fully unit-tested.
+//! MinPoint core engine — platform independent, no I/O, fully unit-tested.
 //!
 //! Native integrations live in the Tauri app (`src-tauri`) behind platform
 //! adapters; this crate holds the logic that must behave identically on

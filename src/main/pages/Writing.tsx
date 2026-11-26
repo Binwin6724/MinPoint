@@ -98,7 +98,7 @@ export function Writing() {
           settings.ai.customActions.map((c) => (
             <Row key={c.id} icon={c.icon} title={<span className="flex items-center gap-2">{c.name} {!c.inMenu && <Badge>Launcher only</Badge>}</span>} description={c.description || c.instructions.slice(0, 110)}>
               <Button size="sm" variant="ghost" onClick={() => setEditing(c)}>Edit</Button>
-              <Button size="sm" variant="ghost" onClick={() => update((s) => void (s.ai.customActions = s.ai.customActions.filter((x) => x.id !== c.id)))} aria-label={`Delete ${c.name}`}><Icon name="trash-2" size={13} /></Button>
+              <Button size="sm" variant="ghost" onClick={() => update((s) => void (s.ai.customActions = s.ai.customActions.filter((x) => x.id !== c.id)))} aria-label={`Delete ${c.name}`}><Icon name="trash" size={13} /></Button>
             </Row>
           ))
         )}
@@ -106,8 +106,8 @@ export function Writing() {
 
       <Section title="Safety">
         <Row icon="shield-check" title="Selected text is treated as data" description="Instructions hidden inside your selection are not followed. AI actions can't run commands, open files, send messages or trigger automations." />
-        <Row icon="send-horizontal" title="Nothing is ever sent for you" description="InputFlow only inserts text into the field you were editing. It never presses Send or submits forms." />
-        <Row icon="crosshair" title="Focus-safe replacement" description="If you switch apps or change the selection while a result is being generated, InputFlow won't insert into the wrong place — it keeps the result for you to copy." />
+        <Row icon="send-horizontal" title="Nothing is ever sent for you" description="MinPoint only inserts text into the field you were editing. It never presses Send or submits forms." />
+        <Row icon="crosshair" title="Focus-safe replacement" description="If you switch apps or change the selection while a result is being generated, MinPoint won't insert into the wrong place — it keeps the result for you to copy." />
       </Section>
     </>
   );

@@ -1,7 +1,7 @@
 //! Menu bar (macOS) / system tray (Windows).
 
 use crate::runtime::Rt;
-use inputflow_core::settings::Settings;
+use minpoint_core::settings::Settings;
 use tauri::image::Image;
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
@@ -12,15 +12,15 @@ fn build_menu(app: &AppHandle, s: &Settings) -> tauri::Result<Menu<tauri::Wry>> 
     Menu::with_items(
         app,
         &[
-            &MenuItem::with_id(app, "open", "Open InputFlow", true, None::<&str>)?,
+            &MenuItem::with_id(app, "open", "Open MinPoint", true, None::<&str>)?,
             &PredefinedMenuItem::separator(app)?,
             &MenuItem::with_id(app, "launcher", "Quick Launcher", !paused, None::<&str>)?,
             &MenuItem::with_id(app, "clipboard", "Clipboard History", !paused, None::<&str>)?,
             &MenuItem::with_id(app, "ocr", "Screen Text Capture", !paused, None::<&str>)?,
             &PredefinedMenuItem::separator(app)?,
-            &MenuItem::with_id(app, "pause", if paused { "Resume InputFlow" } else { "Pause InputFlow" }, true, None::<&str>)?,
+            &MenuItem::with_id(app, "pause", if paused { "Resume MinPoint" } else { "Pause MinPoint" }, true, None::<&str>)?,
             &PredefinedMenuItem::separator(app)?,
-            &MenuItem::with_id(app, "quit", "Quit InputFlow", true, None::<&str>)?,
+            &MenuItem::with_id(app, "quit", "Quit MinPoint", true, None::<&str>)?,
         ],
     )
 }
@@ -30,7 +30,7 @@ pub fn create(app: &AppHandle, s: &Settings) -> tauri::Result<()> {
     TrayIconBuilder::with_id("main")
         .icon(icon)
         .icon_as_template(true)
-        .tooltip("InputFlow")
+        .tooltip("MinPoint")
         .menu(&build_menu(app, s)?)
         .show_menu_on_left_click(true)
         .on_menu_event(|app, ev| {
@@ -58,6 +58,6 @@ pub fn refresh(app: &AppHandle, s: &Settings) {
         if let Ok(m) = build_menu(app, s) {
             let _ = t.set_menu(Some(m));
         }
-        let _ = t.set_tooltip(Some(if s.general.paused { "InputFlow (paused)" } else { "InputFlow" }));
+        let _ = t.set_tooltip(Some(if s.general.paused { "MinPoint (paused)" } else { "MinPoint" }));
     }
 }

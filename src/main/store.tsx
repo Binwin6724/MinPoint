@@ -30,7 +30,7 @@ export function StoreProvider({ children }: { children: (ready: boolean) => Reac
   const [settings, setSettings] = useState<Settings | null>(null);
   const [status, setStatus] = useState<Status | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [page, setPage] = useState("overview");
+  const [page, setPage] = useState(() => new URLSearchParams(location.search).get("page") ?? "overview");
   const tid = useRef(1);
 
   const toast = useCallback((message: string, kind: string = "info") => {

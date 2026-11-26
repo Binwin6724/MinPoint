@@ -7,13 +7,13 @@ use crate::db::ClipItem;
 use crate::platform::{InstalledApp, Permissions, Voice};
 use crate::runtime::Rt;
 use crate::shortcuts::{ShortcutRegistry, ShortcutStatus};
-use inputflow_core::actions::ActionDef;
-use inputflow_core::devtools::{self, DevOp};
-use inputflow_core::launcher::{fuzzy_score, instant_answer, InstantAnswer};
-use inputflow_core::settings::Settings;
-use inputflow_core::snippets::Snippet;
-use inputflow_core::text::{self, TextOp, TextStats};
-use inputflow_core::writing::WritingOp;
+use minpoint_core::actions::ActionDef;
+use minpoint_core::devtools::{self, DevOp};
+use minpoint_core::launcher::{fuzzy_score, instant_answer, InstantAnswer};
+use minpoint_core::settings::Settings;
+use minpoint_core::snippets::Snippet;
+use minpoint_core::text::{self, TextOp, TextStats};
+use minpoint_core::writing::WritingOp;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tauri::{AppHandle, Manager, State};
@@ -389,7 +389,7 @@ pub async fn snippet_insert(rt: State<'_, Rt>, id: String) -> R<()> {
 
 #[tauri::command]
 pub fn snippets_export(rt: State<'_, Rt>) -> R<String> {
-    serde_json::to_string_pretty(&serde_json::json!({ "format": "inputflow-snippets", "version": 1, "snippets": rt.db.snippets()? })).map_err(|e| e.to_string())
+    serde_json::to_string_pretty(&serde_json::json!({ "format": "minpoint-snippets", "version": 1, "snippets": rt.db.snippets()? })).map_err(|e| e.to_string())
 }
 
 /// Import is data-only: snippets are plain text and never execute anything.
@@ -449,12 +449,12 @@ pub async fn launcher_search(rt: State<'_, Rt>, query: String) -> R<LauncherResp
         let caps = rt.capabilities();
         for a in rt.actions.read().unwrap().iter() {
             // Selection-only actions need a selection; they're reachable from the context menu.
-            let needs_sel = a.capabilities.contains(&inputflow_core::actions::Capability::ReadSelection) && a.contexts == [inputflow_core::actions::ActionContext::Selection];
+            let needs_sel = a.capabilities.contains(&minpoint_core::actions::Capability::ReadSelection) && a.contexts == [minpoint_core::actions::ActionContext::Selection];
             if needs_sel || a.capabilities.iter().any(|c| !caps.contains(c)) || a.contexts.is_empty() && !a.id.starts_with("custom.") {
                 continue;
             }
             if let Some(s) = fuzzy_score(&q, &a.name) {
-                results.push(LauncherResult { kind: "action", id: a.id.clone(), title: a.name.clone(), subtitle: if a.requires_ai { "ChatGPT".into() } else { "InputFlow action".into() }, icon: a.icon.clone(), score: s + *usage.get(&a.id).unwrap_or(&0) as i32 * 3 });
+                results.push(LauncherResult { kind: "action", id: a.id.clone(), title: a.name.clone(), subtitle: if a.requires_ai { "ChatGPT".into() } else { "MinPoint action".into() }, icon: a.icon.clone(), score: s + *usage.get(&a.id).unwrap_or(&0) as i32 * 3 });
             }
         }
         if !q.is_empty() {
@@ -469,14 +469,14 @@ pub async fn launcher_search(rt: State<'_, Rt>, query: String) -> R<LauncherResp
                     results.push(LauncherResult { kind: "snippet", id: sn.id.clone(), title: sn.name.clone(), subtitle: if sn.trigger.is_empty() { "Snippet".into() } else { format!("Snippet · {}", sn.trigger) }, icon: "text-cursor-input".into(), score: s });
                 }
             }
-            for (id, title) in [("settings", "InputFlow Settings"), ("snippets", "Text Expander"), ("clipboard", "Smart Clipboard"), ("account", "Connected Account"), ("permissions", "Permissions"), ("privacy", "Privacy Center")] {
+            for (id, title) in [("settings", "MinPoint Settings"), ("snippets", "Text Expander"), ("clipboard", "Smart Clipboard"), ("account", "Connected Account"), ("permissions", "Permissions"), ("privacy", "Privacy Center")] {
                 if let Some(s) = fuzzy_score(&q, title) {
-                    results.push(LauncherResult { kind: "page", id: id.into(), title: title.into(), subtitle: "Open in InputFlow".into(), icon: "settings".into(), score: s - 5 });
+                    results.push(LauncherResult { kind: "page", id: id.into(), title: title.into(), subtitle: "Open in MinPoint".into(), icon: "settings".into(), score: s - 5 });
                 }
             }
             let paused = rt.settings().general.paused;
-            if let Some(s) = fuzzy_score(&q, if paused { "Resume InputFlow" } else { "Pause InputFlow" }) {
-                results.push(LauncherResult { kind: "toggle", id: "pause".into(), title: if paused { "Resume InputFlow".into() } else { "Pause InputFlow".into() }, subtitle: "Service".into(), icon: "power".into(), score: s });
+            if let Some(s) = fuzzy_score(&q, if paused { "Resume MinPoint" } else { "Pause MinPoint" }) {
+                results.push(LauncherResult { kind: "toggle", id: "pause".into(), title: if paused { "Resume MinPoint".into() } else { "Pause MinPoint".into() }, subtitle: "Service".into(), icon: "power".into(), score: s });
             }
         }
         results.sort_by(|a, b| b.score.cmp(&a.score));
@@ -564,10 +564,10 @@ pub fn dev_date_diff(a: String, b: String) -> R<i64> {
 
 #[tauri::command]
 pub fn calculate(expr: String) -> R<String> {
-    if let Some(c) = inputflow_core::units::parse_and_convert(&expr) {
-        return Ok(format!("{} {}", inputflow_core::calc::format_number((c.result * 1e6).round() / 1e6), c.to));
+    if let Some(c) = minpoint_core::units::parse_and_convert(&expr) {
+        return Ok(format!("{} {}", minpoint_core::calc::format_number((c.result * 1e6).round() / 1e6), c.to));
     }
-    inputflow_core::calc::evaluate(&expr).map(inputflow_core::calc::format_number).map_err(|e| e.to_string())
+    minpoint_core::calc::evaluate(&expr).map(minpoint_core::calc::format_number).map_err(|e| e.to_string())
 }
 
 // ---------- speech / OCR / screenshots / windows ----------
@@ -659,7 +659,7 @@ pub struct ExportBundle {
 
 #[tauri::command]
 pub fn export_config(rt: State<'_, Rt>) -> R<String> {
-    serde_json::to_string_pretty(&ExportBundle { format: "inputflow-config".into(), version: 1, settings: rt.settings(), snippets: rt.db.snippets()? }).map_err(|e| e.to_string())
+    serde_json::to_string_pretty(&ExportBundle { format: "minpoint-config".into(), version: 1, settings: rt.settings(), snippets: rt.db.snippets()? }).map_err(|e| e.to_string())
 }
 
 /// Importing configuration never enables privileged features silently:
@@ -667,8 +667,8 @@ pub fn export_config(rt: State<'_, Rt>) -> R<String> {
 #[tauri::command]
 pub async fn import_config(rt: State<'_, Rt>, json: String) -> R<()> {
     let b: ExportBundle = serde_json::from_str(&json).map_err(|e| format!("Invalid configuration file: {e}"))?;
-    if b.format != "inputflow-config" {
-        return Err("This isn't an InputFlow configuration file.".into());
+    if b.format != "minpoint-config" {
+        return Err("This isn't an MinPoint configuration file.".into());
     }
     let cur = rt.settings();
     let mut s = Settings::from_json(&serde_json::to_string(&b.settings).unwrap()).map_err(|e| e.to_string())?;

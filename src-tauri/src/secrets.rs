@@ -4,7 +4,7 @@
 use base64::Engine;
 use rand::RngCore;
 
-const SERVICE: &str = "app.inputflow.desktop";
+const SERVICE: &str = "app.minpoint.desktop";
 
 fn entry(account: &str) -> Result<keyring::Entry, String> {
     keyring::Entry::new(SERVICE, account).map_err(|e| format!("credential store unavailable: {e}"))

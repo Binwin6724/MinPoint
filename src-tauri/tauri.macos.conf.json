@@ -1,13 +1,27 @@
 {
   "bundle": {
     "externalBin": [
-      "binaries/inputflow-helper"
+      "binaries/minpoint-helper"
     ],
     "macOS": {
       "minimumSystemVersion": "13.0",
       "entitlements": null,
-      "signingIdentity": null,
-      "infoPlist": "Info.plist"
+      "signingIdentity": "-",
+      "infoPlist": "Info.plist",
+      "dmg": {
+        "windowSize": {
+          "width": 540,
+          "height": 360
+        },
+        "appPosition": {
+          "x": 140,
+          "y": 170
+        },
+        "applicationFolderPosition": {
+          "x": 400,
+          "y": 170
+        }
+      }
     }
   }
 }

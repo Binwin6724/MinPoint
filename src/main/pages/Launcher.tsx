@@ -5,7 +5,7 @@ export function Launcher() {
   const { settings, update } = useStore();
   return (
     <>
-      <PageHeader title="Quick Launcher" subtitle="A fast command palette for apps, InputFlow actions, snippets, settings, calculations and unit conversions." />
+      <PageHeader title="Quick Launcher" subtitle="A fast command palette for apps, MinPoint actions, snippets, settings, calculations and unit conversions." />
       <Section title="Open">
         <Row icon="command" title="Launcher shortcut" description="Alt + Space by default. Esc closes it.">
           <ShortcutRecorder value={settings.shortcuts["launcher.open"] ?? ""} onChange={(v) => update((s) => void (s.shortcuts["launcher.open"] = v))} />

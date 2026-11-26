@@ -38,7 +38,7 @@ export function QuickActions() {
 
   return (
     <>
-      <PageHeader title="Quick Actions" subtitle="Shift + Right Click anywhere to open InputFlow's menu. Your app's normal right-click menu is untouched — only Shift + Right Click is intercepted." />
+      <PageHeader title="Quick Actions" subtitle="Shift + Right Click anywhere to open MinPoint's menu. Your app's normal right-click menu is untouched — only Shift + Right Click is intercepted." />
 
       <Section title="Trigger">
         <Row icon="mouse-pointer-click" title="Shift + Right Click" description={status?.inputTapRunning ? "Active." : status?.inputTapError ?? "Needs Accessibility and Input Monitoring permission."}>

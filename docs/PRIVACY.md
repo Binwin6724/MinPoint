@@ -1,17 +1,17 @@
 # Privacy
 
-**InputFlow has no servers.** There is no telemetry, analytics, crash reporting, advertising or cloud sync.
+**MinPoint has no servers.** There is no telemetry, analytics, crash reporting, advertising or cloud sync.
 
 ## Stored locally
 
 | Data | Where | Notes |
 |---|---|---|
 | Settings, profiles, custom actions | `settings.json` (app config dir, 0600) | Exportable from Settings → Backup |
-| Clipboard history | `inputflow.db` | **Off by default.** AES-256-GCM encrypted; the key is in the Keychain. Expires after the chosen retention period. |
-| Snippets, counters | `inputflow.db` | |
-| Action usage | `inputflow.db` | Action id, count and timestamp only. Never content. |
+| Clipboard history | `minpoint.db` | **Off by default.** AES-256-GCM encrypted; the key is in the Keychain. Expires after the chosen retention period. |
+| Snippets, counters | `minpoint.db` | |
+| Action usage | `minpoint.db` | Action id, count and timestamp only. Never content. |
 | ChatGPT tokens | Keychain | Removed on Disconnect or Delete everything |
-| Temporary captures | `$TMPDIR/InputFlow` | OCR images are deleted right after recognition. Screenshots are deleted after copying/saving. |
+| Temporary captures | `$TMPDIR/MinPoint` | OCR images are deleted right after recognition. Screenshots are deleted after copying/saving. |
 
 ## Never collected
 
@@ -34,7 +34,7 @@ It is sent to `api.openai.com/v1/responses` with `store:false`, under your ChatG
 - Clear clipboard history.
 - Clear activity.
 - Disconnect ChatGPT, which revokes the token.
-- Pause InputFlow.
+- Pause MinPoint.
 - Exclude apps.
 - Export configuration.
 - **Delete everything.**
