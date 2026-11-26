@@ -8,6 +8,16 @@ _Last updated: 2026-11-25_
 - Rust 1.100 (Homebrew rustup), Node 22, Swift 6.4 (Command Line Tools only; no Xcode).
 - Accessibility, Input Monitoring and Screen Recording **cannot be granted on this machine without an administrator**. That limits manual verification (see below).
 
+## 0.1.2: startup race, installer, Windows UI (2026-11-26)
+
+- **Startup race:** config-created webviews can call `bootstrap` before `setup` has managed `Rt` (seen on a slow, managed Windows PC as "state not managed").
+  - Fixed with `retryWhile(bootstrap)` in the UI, covered by unit tests in `src/lib/retry.test.ts`.
+  - Rejected alternative: creating the windows from code after setup. It took about 7–14 s on Windows (WebView2 creation outside the config path), against about 0.2 s from config.
+- **Installer:** NSIS hooks (`src-tauri/windows/hooks.nsh`) run `taskkill /F /T` before install and uninstall.
+  - Verified on a GitHub Windows runner: installing over a running app exits 0 and leaves the app updated; uninstalling a running app exits 0 and removes it.
+  - The installer and uninstaller icons were verified by extracting them from the built executables.
+  - Upgrading *from 0.1.0* still runs the old 0.1.0 uninstaller, which has no hook. If that frozen 0.1.0 is still running, close it manually once (`taskkill /F /T /IM minpoint.exe`).
+
 ## 0.1.1: startup freeze fix (2026-11-26)
 
 - **Root cause:** `secrets::database_key()` (Keychain / Credential Manager) ran synchronously in Tauri `setup` on the main thread. A Keychain prompt, or a slow or held Credential Manager, blocked it, so IPC never answered and the UI stayed blank.

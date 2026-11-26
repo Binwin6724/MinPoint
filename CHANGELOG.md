@@ -3,7 +3,7 @@
 ## 0.1.2 — 2026-11-26
 
 ### Fixed
-- **"MinPoint couldn't load … state not managed" on startup** (seen on Windows). The windows were created before MinPoint finished starting, so on a slower PC (for example while security software scans a newly installed app) the window asked for data that wasn't ready yet. Windows are now created only after startup completes, and the window retries briefly as a safety net.
+- **"MinPoint couldn't load … state not managed" on startup** (seen on Windows). On a slower PC (for example while security software scans a newly installed app), the window could ask for its data before MinPoint had finished starting. The window now waits and retries for up to 10 seconds instead of failing. The window still appears in about 0.2 s on Windows.
 - **Upgrading while MinPoint is running.** The installer and uninstaller now force-close MinPoint, including its tray process and WebView2 helpers, before installing or removing files. Upgrades no longer stop with "Failed to kill MinPoint".
 - **"Continue with ChatGPT" button text disappeared on hover in dark mode.**
 - If the local database can't be opened, MinPoint now starts with a temporary database and logs the error, instead of quitting.
