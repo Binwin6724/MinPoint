@@ -46,30 +46,59 @@ jobs:
           name: windows-diagnostics
           path: diag/
 
-  # Install the exact published v0.1.0 installer and screenshot it.
-  released-installer:
+  # Installer behaviour while MinPoint is running: upgrade over a running app,
+  # then uninstall a running app. Also extracts the installer/uninstaller icons.
+  installer-test:
     runs-on: windows-latest
     steps:
-      - name: Install MinPoint 0.1.0 from the GitHub release
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with: { key: diag-win-installer }
+      - run: npm ci
+      - name: Build installer
+        run: npx tauri build --bundles nsis
+      - name: Install, upgrade while running, uninstall while running
         shell: pwsh
-        env: { GH_TOKEN: "${{ github.token }}" }
         run: |
-          gh release download v0.1.0 --repo $env:GITHUB_REPOSITORY --pattern "*win-x64-setup.exe" --dir .
-          $exe = Get-ChildItem *-setup.exe | Select-Object -First 1
-          Start-Process $exe.FullName -ArgumentList "/S" -Wait
-          $app = Get-ChildItem "$env:LOCALAPPDATA\MinPoint", "$env:ProgramFiles\MinPoint" -Filter minpoint.exe -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
-          "installed at: $($app.FullName)" | Tee-Object installed.txt
-          Start-Process $app.FullName
-          Start-Sleep -Seconds 20
-          New-Item -ItemType Directory diag-release | Out-Null
-          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
-          $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
-          $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
-          [System.Drawing.Graphics]::FromImage($bmp).CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
-          $bmp.Save("diag-release\desktop.png")
-          Copy-Item installed.txt diag-release\
+          New-Item -ItemType Directory out | Out-Null
+          $setup = (Get-ChildItem target\release\bundle\nsis\*-setup.exe | Select-Object -First 1).FullName
+          $dir = "$env:LOCALAPPDATA\MinPoint"
+          function Running { @(Get-Process minpoint -ErrorAction SilentlyContinue).Count }
+          function Shot($name) {
+            Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+            $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+            $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+            [System.Drawing.Graphics]::FromImage($bmp).CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
+            $bmp.Save("out\$name.png")
+          }
+          function Icon($exe, $name) {
+            Add-Type -AssemblyName System.Drawing
+            [System.Drawing.Icon]::ExtractAssociatedIcon($exe).ToBitmap().Save("out\$name.png")
+          }
+          Icon $setup "icon-setup"
+
+          "1) fresh install" | Tee-Object -Append out\steps.txt
+          Start-Process $setup -ArgumentList "/S" -Wait
+          Start-Process "$dir\minpoint.exe"; Start-Sleep 8
+          "   running processes: $(Running)" | Tee-Object -Append out\steps.txt
+          Icon "$dir\uninstall.exe" "icon-uninstall"
+          Icon "$dir\minpoint.exe" "icon-app"
+
+          "2) install again while MinPoint is running" | Tee-Object -Append out\steps.txt
+          $p = Start-Process $setup -ArgumentList "/S" -Wait -PassThru
+          "   installer exit code: $($p.ExitCode); still running: $(Running); exe present: $(Test-Path "$dir\minpoint.exe")" | Tee-Object -Append out\steps.txt
+
+          "3) uninstall while MinPoint is running" | Tee-Object -Append out\steps.txt
+          Start-Process "$dir\minpoint.exe"; Start-Sleep 8
+          "   running before uninstall: $(Running)" | Tee-Object -Append out\steps.txt
+          $u = Start-Process "$dir\uninstall.exe" -ArgumentList "/S", "_?=$dir" -Wait -PassThru
+          "   uninstaller exit code: $($u.ExitCode); still running: $(Running); exe present: $(Test-Path "$dir\minpoint.exe")" | Tee-Object -Append out\steps.txt
+          Shot "after"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: windows-release-installer
-          path: diag-release/
+          name: windows-installer-test
+          path: out/
