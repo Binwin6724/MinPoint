@@ -161,8 +161,7 @@ pub fn run() {
             app.manage(rt.clone());
 
             log::info!("runtime ready; platform adapter: {}", rt.platform.name());
-            create_windows(&handle)?;
-            log::info!("windows created");
+
             if let Err(e) = tray::create(&handle, &settings) {
                 log::error!("tray icon could not be created: {e}");
             }
@@ -174,17 +173,32 @@ pub fn run() {
                 let _ = tauri::Emitter::emit(&rt2.app, "status:changed", ());
             });
 
-            #[cfg(target_os = "macos")]
-            if settings.general.onboarding_complete {
-                // Live in the menu bar; the Dock icon appears when the window opens.
-                let _ = handle.set_activation_policy(tauri::ActivationPolicy::Accessory);
-            } else {
-                show_main(&handle, None);
-            }
-            #[cfg(not(target_os = "macos"))]
-            if !settings.general.onboarding_complete {
-                show_main(&handle, None);
-            }
+            // Create the windows once setup has returned and the event loop is running.
+            // Building WebView2 windows *inside* setup blocks until the loop runs (~14 s on
+            // Windows); creating them before `Rt` is managed races the UI's first command.
+            let h = handle.clone();
+            let onboarding_done = settings.general.onboarding_complete;
+            tauri::async_runtime::spawn(async move {
+                let h2 = h.clone();
+                let _ = h.run_on_main_thread(move || {
+                    if let Err(e) = create_windows(&h2) {
+                        log::error!("could not create windows: {e}");
+                        return;
+                    }
+                    log::info!("windows created");
+                    #[cfg(target_os = "macos")]
+                    if onboarding_done {
+                        // Live in the menu bar; the Dock icon appears when the window opens.
+                        let _ = h2.set_activation_policy(tauri::ActivationPolicy::Accessory);
+                    } else {
+                        show_main(&h2, None);
+                    }
+                    #[cfg(not(target_os = "macos"))]
+                    if !onboarding_done {
+                        show_main(&h2, None);
+                    }
+                });
+            });
             log::info!("setup finished");
             Ok(())
         })
