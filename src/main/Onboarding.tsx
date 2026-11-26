@@ -81,7 +81,7 @@ export function Onboarding() {
                 ) : (
                   <button
                     onClick={() => api.aiConnect().then(refresh).catch((e) => { toast(errorText(e), "error"); refresh(); })}
-                    className="inline-flex h-9 items-center gap-2 rounded-full bg-black px-4 text-[13px] font-medium text-white hover:bg-black/85 dark:bg-white dark:text-black"
+                    className="inline-flex h-9 items-center gap-2 rounded-full bg-black px-4 text-[13px] font-medium text-white transition hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200"
                   >
                     <Icon name="sparkle" size={13} /> Continue with ChatGPT
                   </button>
