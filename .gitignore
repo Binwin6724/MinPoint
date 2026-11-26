@@ -1,0 +1,9 @@
+node_modules/
+dist/
+target/
+*.log
+.DS_Store
+native/macos/build/
+src-tauri/binaries/
+src-tauri/gen/
+.claude/settings.local.json

@@ -1,0 +1,13 @@
+{
+  "bundle": {
+    "externalBin": [
+      "binaries/inputflow-helper"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "13.0",
+      "entitlements": null,
+      "signingIdentity": null,
+      "infoPlist": "Info.plist"
+    }
+  }
+}

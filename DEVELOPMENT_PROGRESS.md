@@ -1,0 +1,98 @@
+# Development Progress
+
+_Last updated: 2026-11-25_
+
+## Environment used
+
+- macOS 27.2.1 on Apple Silicon (arm64), on a **managed company laptop**.
+- Rust 1.100 (Homebrew rustup), Node 22, Swift 6.4 (Command Line Tools only; no Xcode).
+- Accessibility, Input Monitoring and Screen Recording **cannot be granted on this machine without an administrator**. That limits manual verification (see below).
+
+## Completed
+
+**Phase 1: Foundation**
+- Workspace: `inputflow-core` crate, Tauri 2 app, Swift helper, React UI.
+- Action registry, versioned settings with migration, SQLite with migrations.
+- Keychain secrets, permission manager.
+- Menu bar tray (pause/resume, launcher, clipboard, OCR, quit).
+- Single-instance guard, launch at login, keep running on close.
+
+**Phase 2: Context menu**
+- Shift + Right Click event tap that consumes only Shift + Right Click; normal right-click is untouched.
+- Context-aware menu resolver with favorites, order, submenus, profiles, exclusions and capability gating.
+- AX selection read with a guarded Cmd+C fallback that restores the clipboard.
+- Focus-verified insertion: AX write first, transient-paste fallback.
+- Undo of the last replacement.
+
+**Phase 3: ChatGPT**
+- Official Sign in with ChatGPT: PKCE, loopback callback, dynamic client registration, JWKS ID-token verification, plan-scope check.
+- Keychain storage, refresh, revoke.
+- Model list, streaming `/v1/responses`, documented error mapping, usage-limit handling, Manage usage.
+- Writing operations, prompt isolation, Write with ChatGPT templates, custom AI actions.
+
+**Phase 5: Productivity**
+- Clipboard history: opt-in, AES-GCM at rest, nspasteboard.org concealed/transient markers respected, exclusions, retention, pinned/favorite items.
+- Text expander: bounded buffer, dynamic variables, per-app, import/export.
+- Apple Vision OCR.
+- Screenshots: area, window, full.
+- Read aloud.
+- Safe calculator and unit conversion.
+- Developer tools.
+- Quick launcher: fuzzy search and instant answers.
+
+**Phase 6/7 (partial)**
+- Window snapping: halves, quarters, maximize, center, next display.
+- Global shortcuts with conflict detection.
+- Emergency pause shortcut.
+- Application profiles.
+
+**UI**
+- Dashboard (20 sections), onboarding wizard, overlay surfaces, light/dark/system theme, accent colours, text size, compact menu, reduced motion, increased contrast, searchable settings, Privacy Center.
+
+## In progress / pending
+
+| Feature | Status |
+|---|---|
+| Voice Anywhere (whisper.cpp, model manager, overlay) | Pending (Phase 4) |
+| Keyboard Studio remapping, Mouse Studio, Trackpad Studio | Pending (Phase 6) |
+| Automation / macro recording | Pending (Phase 7) |
+| Saved window layouts | Pending |
+| Screenshot annotation and redaction | Pending |
+| `{input:Label}` prompt during auto-expansion | Expands to empty for now |
+| Windows adapter (UI Automation, SendInput, low-level hooks, Windows OCR) | Pending. Windows currently reports no native capabilities. |
+| Signed auto-update | Not configured |
+| Code signing and notarization | Needs an Apple Developer ID (see PLATFORM_COMPATIBILITY.md) |
+
+## Test results (this session)
+
+- `cargo test --workspace`: **39 passed, 0 failed**.
+  - Core: 30.
+  - App: 9, including a real loopback OAuth callback test, PKCE against the RFC 7636 vector, encrypted clipboard storage and shortcut conflicts.
+- `npm test` (vitest): **2 passed**.
+- `tsc -b`: clean.
+- `npm run build`: JS bundle 374 KB (113 KB gzip). The icon set was trimmed from 1,040 KB.
+- `tauri build --debug --bundles app`: built `InputFlow.app` (debug, 64.5 MiB unoptimised). The helper is 400 KB universal.
+- Smoke-tested the helper protocol directly: ping, permissions, frontmostApp, voices, 33 OCR languages, mouseLocation, error path.
+- Launched the bundled app: the main process and the helper sidecar both started. Killing the app made the helper exit (crash-safety path verified).
+- UI was rendered through the dev harness in headless Chrome: Overview (dark) and onboarding inspected.
+
+## Not verified (blocked)
+
+- End-to-end Shift + Right Click, text insertion, OCR capture, window snapping, clipboard watching and snippet expansion in real apps. All of these need TCC permissions that this managed Mac won't grant without admin rights.
+- ChatGPT sign-in and inference. No sign-in was performed, and eligibility depends on the user's plan.
+- Release-build CPU/RAM/startup/battery benchmarks. **No performance numbers are claimed.** The Overview page shows live measured RSS/CPU from `ps`.
+
+## Known issues / limitations
+
+- In `tauri dev`, macOS attributes permissions to the terminal that launched the app, not to InputFlow. Test permissions with the bundled `.app`.
+- Apps that don't expose `AXSelectedText` (many Electron/Chromium apps) use the Cmd+C fallback. In those apps a changed selection can't be detected before replacing; the focus/pid check still applies.
+- Overlays are opaque (no private transparency API), so the menu-opacity setting has no effect.
+- Each settings change re-registers shortcuts and the event tap. That's fine for toggles; text fields such as profile names save on every keystroke and should be debounced.
+
+## Next tasks
+
+1. Manual verification on a Mac where permissions can be granted. Fill in `PLATFORM_COMPATIBILITY.md`.
+2. Voice Anywhere with whisper.cpp (Metal), a model download manager with SHA-256 verification, and an AVAudioEngine capture overlay.
+3. Windows adapter: UI Automation, SendInput, `WH_MOUSE_LL` for Shift + Right Click, Windows.Media.Ocr, Credential Manager (already wired via `keyring`).
+4. Debounce settings writes from text inputs.
+5. Release benchmarks and signing/notarization pipeline (GitHub Actions).
