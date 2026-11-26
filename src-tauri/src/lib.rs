@@ -3,6 +3,7 @@
 mod ai;
 mod commands;
 mod db;
+mod logging;
 mod platform;
 mod runtime;
 mod secrets;
@@ -100,6 +101,10 @@ pub fn run() {
         .manage(shortcuts::ShortcutRegistry(Mutex::new(vec![])))
         .setup(move |app| {
             let handle = app.handle().clone();
+            if let Ok(dir) = app.path().app_log_dir() {
+                logging::init(&dir);
+            }
+            log::info!("MinPoint {} starting on {} {}", env!("CARGO_PKG_VERSION"), std::env::consts::OS, std::env::consts::ARCH);
             let config_dir = app.path().app_config_dir()?;
             let data_dir = app.path().app_data_dir()?;
             std::fs::create_dir_all(&config_dir)?;
@@ -107,22 +112,32 @@ pub fn run() {
             let settings_path = config_dir.join("settings.json");
             let settings = load_settings(&settings_path);
 
-            let key = secrets::database_key().unwrap_or_else(|e| {
-                log::error!("{e}; clipboard history will use a session-only key");
-                let mut k = [0u8; 32];
-                rand::RngCore::fill_bytes(&mut rand::thread_rng(), &mut k);
-                k
-            });
-            let db = db::Db::open(&data_dir.join("minpoint.db"), &key).map_err(|e| Box::<dyn std::error::Error>::from(e))?;
+            log::info!("settings loaded (onboarding complete: {})", settings.general.onboarding_complete);
+            // No credential-store access here: it can block (Keychain prompt, slow Credential
+            // Manager on managed PCs) and would leave the window blank. Keys load lazily.
+            let db = db::Db::open(
+                &data_dir.join("minpoint.db"),
+                Box::new(|| secrets::database_key().inspect_err(|e| log::error!("database key: {e}"))),
+            )
+            .map_err(|e| Box::<dyn std::error::Error>::from(e))?;
+            log::info!("database opened");
             let ai = ai::AiService::new(&config_dir);
             let platform = make_platform(sink_setup.clone());
             let rt = Runtime::new(handle.clone(), platform, settings.clone(), settings_path, db, ai);
             let _ = sink_setup.set(rt.clone());
             app.manage(rt.clone());
 
-            tray::create(&handle, &settings)?;
+            log::info!("runtime ready; platform adapter: {}", rt.platform.name());
+            if let Err(e) = tray::create(&handle, &settings) {
+                log::error!("tray icon could not be created: {e}");
+            }
             let rt2 = rt.clone();
-            std::thread::spawn(move || rt2.apply_native_settings());
+            std::thread::spawn(move || {
+                rt2.ai.load_stored();
+                rt2.apply_native_settings();
+                log::info!("native services configured");
+                let _ = tauri::Emitter::emit(&rt2.app, "status:changed", ());
+            });
 
             #[cfg(target_os = "macos")]
             if settings.general.onboarding_complete {
@@ -135,6 +150,7 @@ pub fn run() {
             if !settings.general.onboarding_complete {
                 show_main(&handle, None);
             }
+            log::info!("setup finished");
             Ok(())
         })
         .on_window_event(|window, event| match event {
@@ -215,6 +231,7 @@ pub fn run() {
             commands::set_launch_at_login,
             commands::shortcut_conflicts,
             commands::hide_main,
+            commands::log_frontend,
         ])
         .build(tauri::generate_context!())
         .expect("error while building MinPoint");

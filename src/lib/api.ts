@@ -132,6 +132,7 @@ export const api = {
   setLaunchAtLogin: (enabled: boolean) => invoke<boolean>("set_launch_at_login", { enabled }),
   shortcutConflicts: (settings: Settings) => invoke<[string, string][]>("shortcut_conflicts", { settings }),
   hideMain: () => invoke<void>("hide_main"),
+  logFrontend: (level: "error" | "warn" | "info", message: string) => invoke<void>("log_frontend", { level, message }).catch(() => {}),
 };
 
 export function errorText(e: unknown): string {

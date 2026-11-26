@@ -8,6 +8,12 @@ _Last updated: 2026-11-25_
 - Rust 1.100 (Homebrew rustup), Node 22, Swift 6.4 (Command Line Tools only; no Xcode).
 - Accessibility, Input Monitoring and Screen Recording **cannot be granted on this machine without an administrator**. That limits manual verification (see below).
 
+## 0.1.1: startup freeze fix (2026-11-26)
+
+- **Root cause:** `secrets::database_key()` (Keychain / Credential Manager) ran synchronously in Tauri `setup` on the main thread. A Keychain prompt, or a slow or held Credential Manager, blocked it, so IPC never answered and the UI stayed blank.
+- **Verified on this Mac via the new log:** before the fix, startup stopped after the first log line; after the fix, setup finishes in about 70 ms and the UI reports it started.
+- **Windows verification:** the 0.1.0 installer and the fixed build both render on a clean GitHub Windows 11 runner (WebView2 157). The user's PC has WebView2 158, so WebView2 was ruled out.
+
 ## Rename & family style (2026-11-25)
 
 - Renamed InputFlow to **MinPoint**: bundle `app.minpoint.desktop`, crate `minpoint-core`, helper `minpoint-helper`.

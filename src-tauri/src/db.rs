@@ -11,9 +11,15 @@ use sha2::{Digest, Sha256};
 use std::path::Path;
 use std::sync::Mutex;
 
+pub type KeyProvider = Box<dyn Fn() -> Result<[u8; 32], String> + Send + Sync>;
+
 pub struct Db {
     conn: Mutex<Connection>,
-    cipher: Aes256Gcm,
+    /// The encryption key lives in the OS credential store and is fetched only the first
+    /// time clipboard content is read or written — never during app startup, where a
+    /// Keychain prompt or a slow Credential Manager would freeze the UI.
+    key_provider: KeyProvider,
+    cipher: std::sync::OnceLock<Result<Aes256Gcm, String>>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -53,7 +59,7 @@ fn now() -> i64 {
 
 impl Db {
     /// `key` is a 32-byte key held in the OS credential store.
-    pub fn open(path: &Path, key: &[u8; 32]) -> Result<Db, String> {
+    pub fn open(path: &Path, key_provider: KeyProvider) -> Result<Db, String> {
         let conn = Connection::open(path).map_err(|e| e.to_string())?;
         #[cfg(unix)]
         {
@@ -65,7 +71,7 @@ impl Db {
         for (i, m) in MIGRATIONS.iter().enumerate().skip(ver as usize) {
             conn.execute_batch(&format!("BEGIN; {m}; PRAGMA user_version = {}; COMMIT;", i + 1)).map_err(|e| format!("migration {}: {e}", i + 1))?;
         }
-        Ok(Db { conn: Mutex::new(conn), cipher: Aes256Gcm::new_from_slice(key).map_err(|e| e.to_string())? })
+        Ok(Db { conn: Mutex::new(conn), key_provider, cipher: std::sync::OnceLock::new() })
     }
 
     #[cfg(test)]
@@ -74,22 +80,32 @@ impl Db {
         for m in MIGRATIONS {
             conn.execute_batch(m).unwrap();
         }
-        Db { conn: Mutex::new(conn), cipher: Aes256Gcm::new_from_slice(&[7u8; 32]).unwrap() }
+        Db { conn: Mutex::new(conn), key_provider: Box::new(|| Ok([7u8; 32])), cipher: std::sync::OnceLock::new() }
     }
 
-    fn seal(&self, s: &str) -> Vec<u8> {
+    fn cipher(&self) -> Result<&Aes256Gcm, String> {
+        self.cipher
+            .get_or_init(|| {
+                let key = (self.key_provider)()?;
+                Aes256Gcm::new_from_slice(&key).map_err(|e| e.to_string())
+            })
+            .as_ref()
+            .map_err(|e| format!("Clipboard history is unavailable: {e}"))
+    }
+
+    fn seal(&self, s: &str) -> Result<Vec<u8>, String> {
         let mut nonce = [0u8; 12];
         rand::thread_rng().fill_bytes(&mut nonce);
         let mut out = nonce.to_vec();
-        out.extend(self.cipher.encrypt(Nonce::from_slice(&nonce), s.as_bytes()).expect("encrypt"));
-        out
+        out.extend(self.cipher()?.encrypt(Nonce::from_slice(&nonce), s.as_bytes()).map_err(|_| "encryption failed".to_string())?);
+        Ok(out)
     }
 
     fn open_blob(&self, b: &[u8]) -> Option<String> {
         if b.len() < 12 {
             return None;
         }
-        let pt = self.cipher.decrypt(Nonce::from_slice(&b[..12]), &b[12..]).ok()?;
+        let pt = self.cipher().ok()?.decrypt(Nonce::from_slice(&b[..12]), &b[12..]).ok()?;
         String::from_utf8(pt).ok()
     }
 
@@ -109,7 +125,7 @@ impl Db {
     pub fn clip_add(&self, kind: &str, text: &str, app: &str, max_items: u32) -> Result<(), String> {
         let c = self.conn.lock().unwrap();
         let h = self.hash(kind, text);
-        let blob = self.seal(text);
+        let blob = self.seal(text)?;
         // Duplicates are moved to the top (re-inserted with a new id) keeping their flags.
         let flags: Option<(bool, bool)> = c
             .query_row("SELECT pinned, favorite FROM clipboard_items WHERE content_hash = ?1", [&h], |r| Ok((r.get(0)?, r.get(1)?)))
@@ -132,6 +148,7 @@ impl Db {
     }
 
     pub fn clip_list(&self, query: &str, limit: u32) -> Result<Vec<ClipItem>, String> {
+        self.cipher()?;
         let c = self.conn.lock().unwrap();
         let mut st = c
             .prepare("SELECT id, kind, content, app, created_at, pinned, favorite FROM clipboard_items ORDER BY pinned DESC, id DESC LIMIT 5000")

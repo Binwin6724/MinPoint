@@ -259,7 +259,9 @@ impl Runtime {
 
     pub fn toast(&self, message: &str, kind: &str) {
         let _ = self.app.emit("toast", json!({ "message": message, "kind": kind }));
-        log::info!("toast[{kind}]: {message}");
+        if kind == "error" {
+            log::warn!("user-facing error: {message}");
+        }
     }
 
     fn selection(&self) -> String {

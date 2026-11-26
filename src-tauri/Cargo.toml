@@ -14,7 +14,8 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 minpoint-core = { path = "../crates/minpoint-core" }
-tauri = { version = "2", features = ["tray-icon", "image-png"] }
+# `devtools` lets users open Inspect in release builds for troubleshooting (no data leaves the machine).
+tauri = { version = "2", features = ["tray-icon", "image-png", "devtools"] }
 tauri-plugin-global-shortcut = "2"
 tauri-plugin-single-instance = "2"
 tauri-plugin-autostart = "2"
@@ -34,6 +35,6 @@ uuid = { version = "1", features = ["v4"] }
 jsonwebtoken = "9"
 url = "2"
 thiserror = "2"
-log = "0.4"
+log = { version = "0.4", features = ["std"] }
 chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
 urlencoding = "2"

@@ -39,6 +39,7 @@ jobs:
           "running: $(-not $p.HasExited)  exitcode: $($p.ExitCode)" | Tee-Object diag\process.txt
           Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
           Copy-Item app-stdout.txt, app-stderr.txt, webview2-version.txt diag\ -ErrorAction SilentlyContinue
+          Copy-Item "$env:LOCALAPPDATA\app.minpoint.desktop\logs\minpoint.log" diag\ -ErrorAction SilentlyContinue
       - uses: actions/upload-artifact@v4
         if: always()
         with:

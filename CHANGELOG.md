@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.1 — 2026-11-26
+
+### Fixed
+- **Blank window at startup** (reported on Windows; also reproduced on macOS). MinPoint read its key from the system credential store (Keychain / Windows Credential Manager) on the main thread during startup. A Keychain prompt, or a slow Credential Manager on a managed PC, froze startup before the window could talk to the app, leaving a blank window. Credential-store access now happens lazily on background threads, and only when clipboard history or a saved ChatGPT sign-in actually needs it.
+
+### Added
+- If the interface can't start, MinPoint now shows the error, with a **Try again** button, instead of a blank window.
+- A troubleshooting log at `%LOCALAPPDATA%\app.minpoint.desktop\logs\minpoint.log` (Windows) or `~/Library/Logs/app.minpoint.desktop/minpoint.log` (macOS). It records startup steps and errors only, never your text.
+- Right-click ▸ **Inspect** is available for troubleshooting.
+
 ## 0.1.0 — 2026-11-25 (pre-release)
 
 First development build, released as **MinPoint**. It was called InputFlow during early development.

@@ -290,8 +290,8 @@ pub fn open_external(app: AppHandle, which: String) -> R<()> {
 // ---------- clipboard ----------
 
 #[tauri::command]
-pub fn clipboard_list(rt: State<'_, Rt>, query: String) -> R<Vec<ClipItem>> {
-    rt.db.clip_list(&query, 300)
+pub async fn clipboard_list(rt: State<'_, Rt>, query: String) -> R<Vec<ClipItem>> {
+    blocking(&rt, move |rt| rt.db.clip_list(&query, 300)).await
 }
 
 #[tauri::command]
@@ -708,5 +708,16 @@ pub fn shortcut_conflicts(settings: Settings) -> Vec<(String, String)> {
 pub fn hide_main(app: AppHandle) {
     if let Some(w) = app.get_webview_window("main") {
         let _ = w.hide();
+    }
+}
+
+/// Frontend errors (exception messages and stack traces only) go to the log file.
+#[tauri::command]
+pub fn log_frontend(level: String, message: String) {
+    let msg: String = message.chars().take(4000).collect();
+    match level.as_str() {
+        "error" => log::error!("[ui] {msg}"),
+        "warn" => log::warn!("[ui] {msg}"),
+        _ => log::info!("[ui] {msg}"),
     }
 }

@@ -105,14 +105,24 @@ impl AiService {
             }),
             cancel_login: Mutex::new(None),
         };
-        // Load stored tokens (no network).
-        if let Ok(Some(raw)) = crate::secrets::get(CRED_ACCOUNT) {
-            if let Ok(t) = serde_json::from_str::<TokenSet>(&raw) {
-                svc.apply_connected(&t);
-                *svc.tokens.try_lock().unwrap() = Some(t);
-            }
-        }
         svc
+    }
+
+    /// Load a saved sign-in from the credential store. Called from a background
+    /// thread after startup so a slow or prompting credential store can't block the UI.
+    pub fn load_stored(&self) {
+        match crate::secrets::get(CRED_ACCOUNT) {
+            Ok(Some(raw)) => match serde_json::from_str::<TokenSet>(&raw) {
+                Ok(t) => {
+                    self.apply_connected(&t);
+                    *self.tokens.blocking_lock() = Some(t);
+                    log::info!("saved ChatGPT sign-in loaded");
+                }
+                Err(_) => log::warn!("saved ChatGPT sign-in is unreadable; ignoring it"),
+            },
+            Ok(None) => {}
+            Err(e) => log::warn!("credential store unavailable: {e}"),
+        }
     }
 
     pub fn status(&self) -> AiStatus {
