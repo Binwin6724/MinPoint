@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { listen } from "@tauri-apps/api/event";
+import { isBackendStarting, retryWhile } from "../lib/retry";
 import { api, errorText, type ActionDef, type Bootstrap, type Settings, type Status } from "../lib/api";
 
 interface Toast { id: number; message: string; kind: string }
@@ -49,29 +50,20 @@ export function StoreProvider({ children }: { children: (ready: boolean) => Reac
   }, []);
 
   useEffect(() => {
-    // Retry for up to ~10 s while the background service is still starting.
+    // The window can load before the background service has finished starting on a
+    // slow PC; retry for up to ~10 s instead of failing.
     let cancelled = false;
-    const load = async (attempt: number): Promise<void> => {
-      try {
-        const b = await api.bootstrap();
+    retryWhile(api.bootstrap, isBackendStarting, { isCancelled: () => cancelled })
+      .then((b) => {
         if (cancelled) return;
         setBoot(b);
         setSettings(b.settings);
         refresh();
-      } catch (e) {
-        const msg = errorText(e);
-        if (cancelled) return;
-        if (/not managed|state/i.test(msg) && attempt < 40) {
-          setTimeout(() => load(attempt + 1), 250);
-        } else {
-          setBootError(msg);
-        }
-      }
-    };
-    load(0);
+      })
+      .catch((e) => !cancelled && setBootError(errorText(e)));
     const bootTimer = setTimeout(
-      () => setBoot((b) => (b ? b : (setBootError("No response from the background service after 10 seconds."), null))),
-      10_000,
+      () => setBoot((b) => (b ? b : (setBootError("No response from the background service after 15 seconds."), null))),
+      15_000,
     );
     refresh();
     const unsubs = [

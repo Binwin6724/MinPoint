@@ -11,7 +11,35 @@
   },
   "app": {
     "withGlobalTauri": false,
-    "windows": [],
+    "windows": [
+      {
+        "label": "main",
+        "title": "MinPoint",
+        "url": "index.html",
+        "width": 1120,
+        "height": 760,
+        "minWidth": 880,
+        "minHeight": 560,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
+        "visible": false
+      },
+      {
+        "label": "overlay",
+        "title": "MinPoint Overlay",
+        "url": "index.html#/overlay",
+        "width": 300,
+        "height": 420,
+        "decorations": false,
+        "resizable": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "visible": false,
+        "focus": true,
+        "shadow": true,
+        "visibleOnAllWorkspaces": true
+      }
+    ],
     "security": {
       "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: asset: http://asset.localhost; connect-src ipc: http://ipc.localhost; script-src 'self'",
       "freezePrototype": true

@@ -88,35 +88,6 @@ fn make_platform(event_sink: Arc<OnceLock<Rt>>) -> Arc<dyn PlatformAdapter> {
     }
 }
 
-/// Windows are created only after the runtime state is managed. If the webviews were
-/// created up front (from tauri.conf.json), a slow startup — e.g. security software
-/// scanning a freshly installed app — let the UI call commands before `Rt` existed,
-/// failing with "state not managed".
-fn create_windows(app: &AppHandle) -> tauri::Result<()> {
-    use tauri::{WebviewUrl, WebviewWindowBuilder};
-    let main = WebviewWindowBuilder::new(app, "main", WebviewUrl::App("index.html".into()))
-        .title("MinPoint")
-        .inner_size(1120.0, 760.0)
-        .min_inner_size(880.0, 560.0)
-        .visible(false);
-    #[cfg(target_os = "macos")]
-    let main = main.title_bar_style(tauri::TitleBarStyle::Overlay).hidden_title(true);
-    main.build()?;
-    WebviewWindowBuilder::new(app, "overlay", WebviewUrl::App("index.html#/overlay".into()))
-        .title("MinPoint Overlay")
-        .inner_size(300.0, 420.0)
-        .decorations(false)
-        .resizable(false)
-        .always_on_top(true)
-        .skip_taskbar(true)
-        .visible(false)
-        .focused(true)
-        .shadow(true)
-        .visible_on_all_workspaces(true)
-        .build()?;
-    Ok(())
-}
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let sink: Arc<OnceLock<Rt>> = Arc::new(OnceLock::new());
@@ -173,32 +144,19 @@ pub fn run() {
                 let _ = tauri::Emitter::emit(&rt2.app, "status:changed", ());
             });
 
-            // Create the windows once setup has returned and the event loop is running.
-            // Building WebView2 windows *inside* setup blocks until the loop runs (~14 s on
-            // Windows); creating them before `Rt` is managed races the UI's first command.
-            let h = handle.clone();
-            let onboarding_done = settings.general.onboarding_complete;
-            tauri::async_runtime::spawn(async move {
-                let h2 = h.clone();
-                let _ = h.run_on_main_thread(move || {
-                    if let Err(e) = create_windows(&h2) {
-                        log::error!("could not create windows: {e}");
-                        return;
-                    }
-                    log::info!("windows created");
-                    #[cfg(target_os = "macos")]
-                    if onboarding_done {
-                        // Live in the menu bar; the Dock icon appears when the window opens.
-                        let _ = h2.set_activation_policy(tauri::ActivationPolicy::Accessory);
-                    } else {
-                        show_main(&h2, None);
-                    }
-                    #[cfg(not(target_os = "macos"))]
-                    if !onboarding_done {
-                        show_main(&h2, None);
-                    }
-                });
-            });
+            // Windows come from tauri.conf.json (fastest on Windows) and may load before
+            // setup finishes on a slow PC; the UI retries `bootstrap` until `Rt` is managed.
+            #[cfg(target_os = "macos")]
+            if settings.general.onboarding_complete {
+                // Live in the menu bar; the Dock icon appears when the window opens.
+                let _ = handle.set_activation_policy(tauri::ActivationPolicy::Accessory);
+            } else {
+                show_main(&handle, None);
+            }
+            #[cfg(not(target_os = "macos"))]
+            if !settings.general.onboarding_complete {
+                show_main(&handle, None);
+            }
             log::info!("setup finished");
             Ok(())
         })
