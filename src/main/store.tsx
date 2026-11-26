@@ -32,6 +32,7 @@ export function StoreProvider({ children }: { children: (ready: boolean) => Reac
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [page, setPage] = useState(() => new URLSearchParams(location.search).get("page") ?? "overview");
   const tid = useRef(1);
+  const [bootError, setBootError] = useState<string | null>(null);
 
   const toast = useCallback((message: string, kind: string = "info") => {
     const id = tid.current++;
@@ -48,10 +49,17 @@ export function StoreProvider({ children }: { children: (ready: boolean) => Reac
   }, []);
 
   useEffect(() => {
-    api.bootstrap().then((b) => {
-      setBoot(b);
-      setSettings(b.settings);
-    });
+    api
+      .bootstrap()
+      .then((b) => {
+        setBoot(b);
+        setSettings(b.settings);
+      })
+      .catch((e) => setBootError(errorText(e)));
+    const bootTimer = setTimeout(
+      () => setBoot((b) => (b ? b : (setBootError("No response from the background service after 10 seconds."), null))),
+      10_000,
+    );
     refresh();
     const unsubs = [
       listen("status:changed", () => refresh()),
@@ -62,6 +70,7 @@ export function StoreProvider({ children }: { children: (ready: boolean) => Reac
       if (document.visibilityState === "visible") refresh();
     }, 5000);
     return () => {
+      clearTimeout(bootTimer);
       clearInterval(iv);
       unsubs.forEach((p) => p.then((f) => f()));
     };
@@ -87,6 +96,7 @@ export function StoreProvider({ children }: { children: (ready: boolean) => Reac
     [settings, refresh, toast],
   );
 
+  if (bootError) throw new Error(`MinPoint couldn't start its background service: ${bootError}`);
   if (!boot || !settings) return <>{children(false)}</>;
   return (
     <Ctx.Provider value={{ boot, settings, status, actions: boot.actions, update, refresh, toast, toasts, page, setPage }}>
