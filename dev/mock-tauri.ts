@@ -24,11 +24,12 @@ const actions = [
 ];
 // ?demo=1 shows a fully set-up machine (sample data, for README screenshots only).
 const demo = q.get("demo") === "1";
+const harnessOs = q.get("os") ?? "macos";
 const g = (v: string) => (demo ? "granted" : v);
 const handlers: Record<string, (a: any) => any> = {
   has_undo: () => false,
-  bootstrap: () => ({ settings, platform: "harness", os: "macos", version: "0.1.0", actions }),
-  get_status: () => ({ paused: false, platform: "harness", helperRunning: true, inputTapRunning: demo, inputTapError: demo ? null : "Input Monitoring / Accessibility permission is required for Shift + Right Click.",
+  bootstrap: () => ({ settings, platform: "harness", os: harnessOs, version: "0.1.0", actions }),
+  get_status: () => ({ paused: false, platform: harnessOs === "windows" ? "unsupported" : "harness", helperRunning: harnessOs !== "windows", inputTapRunning: demo, inputTapError: demo ? null : "Input Monitoring / Accessibility permission is required for Shift + Right Click.",
     permissions: { accessibility: g("not_granted"), inputMonitoring: g("not_granted"), screenRecording: g("not_granted"), microphone: "not_determined" },
     ai: demo
       ? { state: "connected", email: "you@example.com", name: "Sample User", planUsageAuthorized: true, usageLimited: false, error: null, models: [{ slug: "sample-model", displayName: "Default model" }], manageUsageUrl: "", showWelcome: false }

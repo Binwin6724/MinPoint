@@ -29,11 +29,11 @@ export function Overview() {
       <PageHeader title="Overview" subtitle="Everything MinPoint is doing on this computer, at a glance." />
 
       {status && !status.helperRunning && (
-        <div className="mb-5 flex items-center gap-3 rounded-[12px] border border-bad/35 bg-bad/10 p-3.5 text-[13px]">
-          <Icon name="triangle-exclamation-point" className="text-bad" />
+        <div className={`mb-5 flex items-center gap-3 rounded-[12px] border p-3.5 text-[13px] ${status.platform === "unsupported" ? "border-warn/35 bg-warn/10" : "border-bad/35 bg-bad/10"}`}>
+          <Icon name={status.platform === "unsupported" ? "info" : "triangle-exclamation-point"} className={status.platform === "unsupported" ? "text-warn" : "text-bad"} />
           <div className="flex-1">
             {status.platform === "unsupported"
-              ? "System-wide features aren't available on this operating system in this build. Local tools in the app still work."
+              ? "On Windows, this version includes the in-app tools (Developer Tools, calculator, snippets, settings). System-wide features such as Shift + Right Click, text insertion, clipboard history, OCR and window snapping work on macOS today; Windows support is in progress."
               : "MinPoint's native helper isn't running, so system-wide features are unavailable."}
           </div>
         </div>
@@ -50,8 +50,8 @@ export function Overview() {
         <Stat
           icon="activity"
           label="Service"
-          value={status?.paused ? "Paused" : status?.helperRunning ? "Running" : "Unavailable"}
-          sub={status ? (status.inputTapRunning ? "Shift + Right Click active" : "Shift + Right Click inactive") : "…"}
+          value={status?.paused ? "Paused" : status?.helperRunning ? "Running" : status?.platform === "unsupported" ? "In-app tools only" : "Unavailable"}
+          sub={status ? (status.platform === "unsupported" ? "System-wide features: macOS only for now" : status.inputTapRunning ? "Shift + Right Click active" : "Shift + Right Click inactive") : "…"}
         />
         <Stat
           icon="circle-user"

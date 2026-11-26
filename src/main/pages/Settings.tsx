@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useStore } from "../store";
 import { api, errorText, type Voice } from "../../lib/api";
+import { trayName } from "../../lib/platform";
 import { Badge, Button, PageHeader, Row, Section, ShortcutRecorder, Toggle } from "../../components/ui";
 
 function download(name: string, text: string) {
@@ -27,10 +28,10 @@ export function SettingsPage() {
 
       {show("general startup login close menu bar background") && (
         <Section title="General">
-          <Row title="Open at login" description="Start MinPoint in the menu bar when you log in.">
+          <Row title="Open at login" description={`Start MinPoint in the ${trayName(boot.os)} when you sign in.`}>
             <Toggle label="Open at login" checked={settings.general.launchAtLogin} onChange={(v) => api.setLaunchAtLogin(v).then((on) => update((s) => void (s.general.launchAtLogin = on))).catch((e) => toast(errorText(e), "error"))} />
           </Row>
-          <Row title="Keep running when the window is closed" description="Shortcuts, the context menu and clipboard history keep working from the menu bar.">
+          <Row title="Keep running when the window is closed" description={`MinPoint keeps running in the ${trayName(boot.os)}; reopen it from there.`}>
             <Toggle label="Keep running" checked={settings.general.keepRunningOnClose} onChange={(v) => update((s) => void (s.general.keepRunningOnClose = v))} />
           </Row>
         </Section>

@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.1.2 — 2026-11-26
+
+### Fixed
+- **"MinPoint couldn't load … state not managed" on startup** (seen on Windows). The windows were created before MinPoint finished starting, so on a slower PC (for example while security software scans a newly installed app) the window asked for data that wasn't ready yet. Windows are now created only after startup completes, and the window retries briefly as a safety net.
+- **Upgrading while MinPoint is running.** The installer and uninstaller now force-close MinPoint, including its tray process and WebView2 helpers, before installing or removing files. Upgrades no longer stop with "Failed to kill MinPoint".
+- **"Continue with ChatGPT" button text disappeared on hover in dark mode.**
+- If the local database can't be opened, MinPoint now starts with a temporary database and logs the error, instead of quitting.
+
+### Changed
+- The setup file and uninstaller use the MinPoint icon.
+- The Windows UI is clearer:
+  - the status shows **In-app tools only** instead of a red error;
+  - macOS-only features carry a **Mac** tag and an explanation;
+  - Permissions explains that Windows needs none;
+  - text says "system tray" instead of "menu bar";
+  - the onboarding wizard skips the macOS permissions step.
+
 ## 0.1.1 — 2026-11-26
 
 ### Fixed

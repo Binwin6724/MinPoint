@@ -74,6 +74,15 @@ impl Db {
         Ok(Db { conn: Mutex::new(conn), key_provider, cipher: std::sync::OnceLock::new() })
     }
 
+    /// Fallback when the database file can't be opened: data lasts for this session only.
+    pub fn open_temporary(key_provider: KeyProvider) -> Db {
+        let conn = Connection::open_in_memory().expect("in-memory sqlite");
+        for m in MIGRATIONS {
+            conn.execute_batch(m).expect("migrations");
+        }
+        Db { conn: Mutex::new(conn), key_provider, cipher: std::sync::OnceLock::new() }
+    }
+
     #[cfg(test)]
     pub fn open_in_memory() -> Db {
         let conn = Connection::open_in_memory().unwrap();

@@ -49,13 +49,26 @@ export function StoreProvider({ children }: { children: (ready: boolean) => Reac
   }, []);
 
   useEffect(() => {
-    api
-      .bootstrap()
-      .then((b) => {
+    // Retry for up to ~10 s while the background service is still starting.
+    let cancelled = false;
+    const load = async (attempt: number): Promise<void> => {
+      try {
+        const b = await api.bootstrap();
+        if (cancelled) return;
         setBoot(b);
         setSettings(b.settings);
-      })
-      .catch((e) => setBootError(errorText(e)));
+        refresh();
+      } catch (e) {
+        const msg = errorText(e);
+        if (cancelled) return;
+        if (/not managed|state/i.test(msg) && attempt < 40) {
+          setTimeout(() => load(attempt + 1), 250);
+        } else {
+          setBootError(msg);
+        }
+      }
+    };
+    load(0);
     const bootTimer = setTimeout(
       () => setBoot((b) => (b ? b : (setBootError("No response from the background service after 10 seconds."), null))),
       10_000,
@@ -70,6 +83,7 @@ export function StoreProvider({ children }: { children: (ready: boolean) => Reac
       if (document.visibilityState === "visible") refresh();
     }, 5000);
     return () => {
+      cancelled = true;
       clearTimeout(bootTimer);
       clearInterval(iv);
       unsubs.forEach((p) => p.then((f) => f()));

@@ -10,7 +10,18 @@ export const PERMS: { key: keyof Permissions; title: string; icon: string; why: 
 ];
 
 export function PermissionsPage() {
-  const { status, refresh, toast } = useStore();
+  const { status, refresh, toast, boot } = useStore();
+  if (boot.os !== "macos") {
+    return (
+      <>
+        <PageHeader title="Permissions" subtitle="What MinPoint needs from your system." />
+        <Section>
+          <Row icon="shield-check" title="No special permissions needed on Windows" description="This version of MinPoint on Windows runs its in-app tools only, so it doesn't ask for any system permissions." />
+          <Row icon="info" title="When Windows system-wide features arrive" description="Shift + Right Click, text insertion and clipboard history will work for normal apps without extra permissions. Apps running as administrator can't be read or typed into from a normal app; MinPoint won't try to bypass that." />
+        </Section>
+      </>
+    );
+  }
   const p = status?.permissions;
   const request = async (k: keyof Permissions) => {
     try {

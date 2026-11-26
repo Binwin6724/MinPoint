@@ -16,6 +16,8 @@ import { PermissionsPage } from "./pages/Permissions";
 import { SettingsPage, PrivacyCenter } from "./pages/Settings";
 import { Planned } from "./pages/Planned";
 import { Onboarding } from "./Onboarding";
+import { NotOnThisPlatform } from "../components/PlatformNotice";
+import { NATIVE_PAGES } from "../lib/platform";
 
 interface NavItem { id: string; label: string; icon: string; planned?: boolean }
 const NAV: { title?: string; items: NavItem[] }[] = [
@@ -94,6 +96,7 @@ export function MainApp() {
   useTheme(settings.appearance);
   if (!settings.general.onboardingComplete) return <Onboarding />;
   const paused = status?.paused ?? settings.general.paused;
+  const nativeMissing = boot.os !== "macos" && status?.platform === "unsupported";
   return (
     <div className="app-glow relative flex h-full">
       <aside className="relative z-[1] flex w-[228px] shrink-0 flex-col border-r border-line bg-sidebar">
@@ -118,7 +121,11 @@ export function MainApp() {
                 >
                   <Icon name={it.icon} size={15} className={page === it.id ? "text-accent" : ""} />
                   <span className="flex-1 truncate">{it.label}</span>
-                  {it.planned && <span className="rounded-full bg-hover px-1.5 text-[10px] text-faint">Soon</span>}
+                  {it.planned ? (
+                    <span className="rounded-full bg-hover px-1.5 text-[10px] text-faint">Soon</span>
+                  ) : nativeMissing && NATIVE_PAGES.has(it.id) ? (
+                    <span className="rounded-full bg-hover px-1.5 text-[10px] text-faint" title="Available on macOS; Windows support is in progress">Mac</span>
+                  ) : null}
                 </button>
               ))}
             </div>
@@ -129,8 +136,10 @@ export function MainApp() {
             onClick={() => update((s) => void (s.general.paused = !s.general.paused))}
             className="flex w-full items-center gap-2 text-[11.5px] text-muted hover:text-fg"
           >
-            <span className={`h-2 w-2 rounded-full ${paused ? "dot-warn" : status?.helperRunning ? "dot-ok" : "dot-bad"}`} />
-            <span className="flex-1 text-left">{paused ? "Paused" : status?.helperRunning ? "Running" : status ? "Native service unavailable" : "Starting…"}</span>
+            <span className={`h-2 w-2 rounded-full ${paused ? "dot-warn" : status?.helperRunning ? "dot-ok" : status?.platform === "unsupported" ? "dot-warn" : "dot-bad"}`} />
+            <span className="flex-1 text-left">
+              {paused ? "Paused" : status?.helperRunning ? "Running" : status?.platform === "unsupported" ? "In-app tools only" : status ? "Native service unavailable" : "Starting…"}
+            </span>
             <span className="text-faint">{paused ? "Resume" : "Pause"}</span>
           </button>
           <button onClick={() => setPage("account")} className="flex w-full items-center gap-2 text-[11.5px] text-muted hover:text-fg">
@@ -145,6 +154,7 @@ export function MainApp() {
         <div className="drag-region h-[46px] shrink-0" />
         <div className="flex-1 overflow-y-auto px-9 pb-10">
           <div className="mx-auto max-w-[900px]">
+            {boot.os !== "macos" && status?.platform === "unsupported" && NATIVE_PAGES.has(page) && <NotOnThisPlatform os={boot.os} />}
             <Page id={page} />
           </div>
         </div>

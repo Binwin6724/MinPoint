@@ -3,11 +3,15 @@ import { useStore } from "./store";
 import { api, errorText } from "../lib/api";
 import { Badge, Button, Icon, useTheme, prettyAccelerator } from "../components/ui";
 import { PERMS } from "./pages/Permissions";
+import { trayName } from "../lib/platform";
 
-const STEPS = ["welcome", "menu", "permissions", "ai", "done"] as const;
+const ALL_STEPS = ["welcome", "menu", "permissions", "ai", "done"] as const;
 
 export function Onboarding() {
-  const { settings, update, status, refresh, toast } = useStore();
+  const { settings, update, status, refresh, toast, boot } = useStore();
+  const isMac = boot.os === "macos";
+  // Windows needs no permissions in this version, so that step is skipped.
+  const STEPS = isMac ? ALL_STEPS : ALL_STEPS.filter((s) => s !== "permissions");
   useTheme(settings.appearance);
   const [i, setI] = useState(0);
   const step = STEPS[i];
@@ -45,7 +49,8 @@ export function Onboarding() {
                 ))}
               </div>
               <p className="mt-4 text-[12.5px] text-muted">
-                A normal right-click still opens your app's own menu. Press <kbd className="rounded border border-line bg-raised px-1">{prettyAccelerator(settings.shortcuts["app.emergency_disable"] ?? "")}</kbd> any time to pause everything. You can also pause from the menu bar icon.
+                A normal right-click still opens your app's own menu. Press <kbd className="rounded border border-line bg-raised px-1">{prettyAccelerator(settings.shortcuts["app.emergency_disable"] ?? "")}</kbd> any time to pause everything. You can also pause from the {trayName(boot.os)} icon.
+                {!isMac && <span className="mt-2 block text-warn">On Windows, Shift + Right Click is coming in a future version. The in-app tools work today.</span>}
               </p>
             </div>
           )}
@@ -95,7 +100,7 @@ export function Onboarding() {
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-ok/10 text-ok"><Icon name="check" size={26} /></div>
               <h2 className="text-[20px] font-semibold">You're set</h2>
               <p className="mx-auto mt-2 max-w-[420px] text-[13.5px] text-muted">
-                MinPoint lives in your menu bar. Try selecting some text and pressing Shift + Right Click, or press {prettyAccelerator(settings.shortcuts["launcher.open"] ?? "")} for the launcher.
+                MinPoint lives in your {trayName(boot.os)}. {isMac ? "Try selecting some text and pressing Shift + Right Click, or press" : "Open it any time from the tray icon. Shortcut:"} {prettyAccelerator(settings.shortcuts["launcher.open"] ?? "")} for the launcher.
               </p>
             </div>
           )}

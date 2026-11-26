@@ -88,6 +88,35 @@ fn make_platform(event_sink: Arc<OnceLock<Rt>>) -> Arc<dyn PlatformAdapter> {
     }
 }
 
+/// Windows are created only after the runtime state is managed. If the webviews were
+/// created up front (from tauri.conf.json), a slow startup — e.g. security software
+/// scanning a freshly installed app — let the UI call commands before `Rt` existed,
+/// failing with "state not managed".
+fn create_windows(app: &AppHandle) -> tauri::Result<()> {
+    use tauri::{WebviewUrl, WebviewWindowBuilder};
+    let main = WebviewWindowBuilder::new(app, "main", WebviewUrl::App("index.html".into()))
+        .title("MinPoint")
+        .inner_size(1120.0, 760.0)
+        .min_inner_size(880.0, 560.0)
+        .visible(false);
+    #[cfg(target_os = "macos")]
+    let main = main.title_bar_style(tauri::TitleBarStyle::Overlay).hidden_title(true);
+    main.build()?;
+    WebviewWindowBuilder::new(app, "overlay", WebviewUrl::App("index.html#/overlay".into()))
+        .title("MinPoint Overlay")
+        .inner_size(300.0, 420.0)
+        .decorations(false)
+        .resizable(false)
+        .always_on_top(true)
+        .skip_taskbar(true)
+        .visible(false)
+        .focused(true)
+        .shadow(true)
+        .visible_on_all_workspaces(true)
+        .build()?;
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let sink: Arc<OnceLock<Rt>> = Arc::new(OnceLock::new());
@@ -115,11 +144,15 @@ pub fn run() {
             log::info!("settings loaded (onboarding complete: {})", settings.general.onboarding_complete);
             // No credential-store access here: it can block (Keychain prompt, slow Credential
             // Manager on managed PCs) and would leave the window blank. Keys load lazily.
-            let db = db::Db::open(
-                &data_dir.join("minpoint.db"),
-                Box::new(|| secrets::database_key().inspect_err(|e| log::error!("database key: {e}"))),
-            )
-            .map_err(|e| Box::<dyn std::error::Error>::from(e))?;
+            let key_provider = || -> db::KeyProvider { Box::new(|| secrets::database_key().inspect_err(|e| log::error!("database key: {e}"))) };
+            let db = match db::Db::open(&data_dir.join("minpoint.db"), key_provider()) {
+                Ok(db) => db,
+                Err(e) => {
+                    // Keep the app usable (settings, tools) instead of exiting with no window.
+                    log::error!("database could not be opened ({e}); using a temporary in-memory database");
+                    db::Db::open_temporary(key_provider())
+                }
+            };
             log::info!("database opened");
             let ai = ai::AiService::new(&config_dir);
             let platform = make_platform(sink_setup.clone());
@@ -128,6 +161,8 @@ pub fn run() {
             app.manage(rt.clone());
 
             log::info!("runtime ready; platform adapter: {}", rt.platform.name());
+            create_windows(&handle)?;
+            log::info!("windows created");
             if let Err(e) = tray::create(&handle, &settings) {
                 log::error!("tray icon could not be created: {e}");
             }
